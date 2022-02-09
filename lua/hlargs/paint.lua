@@ -43,26 +43,26 @@ local function contains(arr, val)
     return false
 end
 
-function find_and_paint_iteration(bufnr, co, stopper)
+function find_and_paint_iteration(bufnr, ns, co, stopper)
   vim.defer_fn(function()
     if coroutine.status(co) ~= "dead" and not stopper.stop then
       local running, arg_nodes, usage_nodes = coroutine.resume(co, bufnr)
       if running then
-        local ns = buf_data[bufnr].namespaces.using
         if config.opts.paint_arg_declarations then
           paint_nodes(bufnr, ns, arg_nodes)
         end
         paint_nodes(bufnr, ns, usage_nodes)
-        find_and_paint_iteration(bufnr, co, stopper)
+        find_and_paint_iteration(bufnr, ns, co, stopper)
       end
     else
       if not vim.api.nvim_buf_is_valid(bufnr) then
         buf_data[bufnr] = nil
       else
         clear_all(bufnr, buf_data[bufnr].namespaces.to_clean)
+        buf_data[bufnr].namespaces.to_clean = { ns }
       end
     end
-  end, 1)
+  end, config.opts.performance.parse_delay)
 end
 
 function M.find_and_paint_nodes(bufnr)
@@ -88,13 +88,12 @@ function M.find_and_paint_nodes(bufnr)
   for k,stopper in ipairs(buf_data[bufnr].coroutines.stoppers) do
     stopper.stop = true
   end
-  table.insert(buf_data[bufnr].namespaces.to_clean, buf_data[bufnr].namespaces.using)
-  buf_data[bufnr].namespaces.using = vim.api.nvim_create_namespace("")
   local stopper = {}
   table.insert(buf_data[bufnr].coroutines.stoppers, stopper)
 
   co = coroutine.create(parser.get_nodes_to_paint)
-  find_and_paint_iteration(bufnr, co, stopper)
+  local ns = vim.api.nvim_create_namespace("")
+  find_and_paint_iteration(bufnr, ns, co, stopper)
 
 end
 
@@ -106,7 +105,6 @@ function M.enable()
         autocmd!
         autocmd BufEnter,TextChanged,InsertLeavePre * lua require('hlargs.paint').find_and_paint_nodes()
       augroup end]])
-    vim.cmd("highlight! def Hlargs guifg=" .. config.opts.color)
     M.find_and_paint_nodes()
   end
 end
@@ -116,10 +114,15 @@ function M.disable()
     enabled = false
     pcall(vim.cmd, "autocmd! Hlargs")
     pcall(vim.cmd, "augroup! Hlargs")
-    for _, bufnr in pairs(vim.api.nvim_list_bufs()) do
-      if vim.api.nvim_buf_is_valid(bufnr) then
-        clear(bufnr)
+    for bufnr, data in ipairs(buf_data) do
+      for _, stopper in pairs(data.coroutines.stoppers) do
+        stopper.stop = true
       end
+      if vim.api.nvim_buf_is_valid(bufnr) then
+        clear_all(bufnr, data.namespaces.to_clean)
+        data.namespaces.to_clean = {}
+      end
+      buf_data[bufnr] = nil
     end
   end
 end

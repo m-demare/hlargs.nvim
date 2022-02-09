@@ -84,7 +84,12 @@ function M.get_nodes_to_paint(bufnr)
   local root = syntax_tree[1]:root()
 
   local start_row, _, end_row, _ = root:range()
+  local i = 0
   for id, node in query:iter_captures(root, bufnr, start_row, end_row) do
+    i = i+1
+    if config.opts.performance.max_iterations > 0 and i > config.opts.performance.max_iterations then
+      return
+    end
     local name = query.captures[id] -- name of the capture
     local arg_nodes, arg_names_set = M.get_args(node, bufnr)
     local usages_nodes = {}
