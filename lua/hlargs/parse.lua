@@ -3,6 +3,7 @@ local M = {}
 local ts = vim.treesitter
 local ts_utils = require 'nvim-treesitter.ts_utils'
 local queries = require 'vim.treesitter.query'
+local config = require("hlargs.config")
 
 local function print_node(node)
     print(string.format("Node: type '%s', name '%s'", node:type(), node:named()))
@@ -83,16 +84,16 @@ function M.get_nodes_to_paint(bufnr)
   local root = syntax_tree[1]:root()
 
   local start_row, _, end_row, _ = root:range()
-  local all_arg_nodes, all_usage_nodes = {}, {}
   for id, node in query:iter_captures(root, bufnr, start_row, end_row) do
     local name = query.captures[id] -- name of the capture
     local arg_nodes, arg_names_set = M.get_args(node, bufnr)
-    local body_node = M.get_body_node(node, bufnr)
-    local usages_nodes = M.get_arg_usages(body_node, arg_names_set, bufnr)
-    table.insert(all_arg_nodes, arg_nodes)
-    table.insert(all_usage_nodes, usages_nodes)
+    local usages_nodes = {}
+    if config.opts.paint_arg_usages then
+      local body_node = M.get_body_node(node, bufnr)
+      usages_nodes = M.get_arg_usages(body_node, arg_names_set, bufnr)
+    end
+    coroutine.yield(arg_nodes, usages_nodes)
   end
-  return all_arg_nodes, all_usage_nodes
 end
 
 return M

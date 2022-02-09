@@ -1,6 +1,4 @@
-(function_declaration
-  body: (statement_block)) @fn
-(function
-  body: (statement_block)) @fn
-(arrow_function
-  body: (_)) @fn
+(function_declaration) @fn
+(method_definition) @fn
+(function) @fn
+(arrow_function) @fn
