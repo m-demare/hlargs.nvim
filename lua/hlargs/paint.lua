@@ -1,6 +1,7 @@
 local M = {}
-local parser = require("hlargs.parse")
-local config = require("hlargs.config")
+local parser = require 'hlargs.parse'
+local config = require 'hlargs.config'
+local util = require 'hlargs.util'
 
 local buf_data = {}
 local enabled = false
@@ -34,15 +35,6 @@ local function paint_nodes(bufnr, ns, node_group)
   end
 end
 
-local function contains(arr, val)
-    for i, value in ipairs(arr) do
-        if value == val then
-            return true
-        end
-    end
-    return false
-end
-
 function find_and_paint_iteration(bufnr, ns, co, stopper)
   vim.defer_fn(function()
     if coroutine.status(co) ~= "dead" and not stopper.stop then
@@ -70,7 +62,7 @@ function M.find_and_paint_nodes(bufnr)
 
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local filetype = vim.fn.getbufvar(bufnr, '&filetype')
-  if contains(config.opts.excluded_filetypes, filetype) then
+  if util.contains(config.opts.excluded_filetypes, filetype) then
     return
   end
 

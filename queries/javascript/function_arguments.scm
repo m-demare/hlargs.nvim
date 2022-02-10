@@ -5,10 +5,11 @@
   parameters: (formal_parameters
     (identifier) @argname))
 (function
-  parameters: (formal_parameters
+  . parameters: (formal_parameters
     (identifier) @argname))
 (arrow_function
-  parameters: (formal_parameters
+  . parameters: (formal_parameters
     (identifier) @argname))
 (arrow_function
-  parameter: (identifier) @argname)
+  . parameter: (identifier) @argname)
+

@@ -3,11 +3,13 @@ local M = {}
 local ts = vim.treesitter
 local ts_utils = require 'nvim-treesitter.ts_utils'
 local queries = require 'vim.treesitter.query'
-local config = require("hlargs.config")
+local config = require 'hlargs.config'
+local util = require 'hlargs.util'
 
-local function print_node(node)
-    print(string.format("Node: type '%s', name '%s'", node:type(), node:named()))
-end
+local ignored_field_names = {
+  python = { 'attribute' },
+  lua = { 'field' }
+}
 
 local function i(...)
   local objects = {}
@@ -55,18 +57,30 @@ function M.get_body_node(func_node, bufnr)
   end
 end
 
+local function ignore_node(filetype, node)
+  if ignored_field_names[filetype] and node:parent() then
+    for ch, field_name in node:parent():iter_children() do
+      if ch == node and util.contains(ignored_field_names[filetype], field_name) then
+        return true
+      end
+    end
+  end
+  return false
+end
+
 function M.get_arg_usages(body_node, arg_names_set, bufnr)
   local filetype = vim.fn.getbufvar(bufnr, '&filetype')
   local query = queries.get_query(filetype, 'variables')
-  -- print_node_text(body_node)
 
   local start_row, _, end_row, _ = body_node:range()
 
   local usages_nodes = {}
   for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do
-    local arg_name = ts_utils.get_node_text(node, bufnr)[1]
-    if arg_names_set[arg_name] then
-      table.insert(usages_nodes, node)
+    if not ignore_node(filetype, node) then
+      local arg_name = ts_utils.get_node_text(node, bufnr)[1]
+      if arg_names_set[arg_name] then
+        table.insert(usages_nodes, node)
+      end
     end
   end
   return usages_nodes
