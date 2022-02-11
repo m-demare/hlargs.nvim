@@ -6,29 +6,6 @@ local queries = require 'vim.treesitter.query'
 local config = require 'hlargs.config'
 local util = require 'hlargs.util'
 
-local ignored_field_names = {
-  python = { 'attribute' },
-  lua = { 'field' }
-}
-
-local function i(...)
-  local objects = {}
-  for i = 1, select('#', ...) do
-    local v = select(i, ...)
-    table.insert(objects, vim.inspect(v))
-  end
-
-  print(table.concat(objects, '\n'))
-  return ...
-end
-
-local function print_node_text(node)
-  local text = ts_utils.get_node_text(node, bufnr)
-  for line = 1, #text do
-    print(text[line])
-  end
-end
-
 function M.get_args(func_node, bufnr)
   local filetype = vim.fn.getbufvar(bufnr, '&filetype')
   local query = queries.get_query(filetype, 'function_arguments')
@@ -36,8 +13,7 @@ function M.get_args(func_node, bufnr)
   local start_row, _, end_row, _ = func_node:range()
   local arg_names_set, arg_nodes = {}, {}
   for id, node in query:iter_captures(func_node, bufnr, start_row, end_row+1) do
-    local parent = node:parent()
-    if parent == func_node or parent:parent() == func_node then
+    if util.get_first_function_parent(filetype, node) == func_node then
       table.insert(arg_nodes, node)
       local arg_name = ts_utils.get_node_text(node, bufnr)[1]
       arg_names_set[arg_name] = true
@@ -57,17 +33,6 @@ function M.get_body_node(func_node, bufnr)
   end
 end
 
-local function ignore_node(filetype, node)
-  if ignored_field_names[filetype] and node:parent() then
-    for ch, field_name in node:parent():iter_children() do
-      if ch == node and util.contains(ignored_field_names[filetype], field_name) then
-        return true
-      end
-    end
-  end
-  return false
-end
-
 function M.get_arg_usages(body_node, arg_names_set, bufnr)
   local filetype = vim.fn.getbufvar(bufnr, '&filetype')
   local query = queries.get_query(filetype, 'variables')
@@ -76,7 +41,7 @@ function M.get_arg_usages(body_node, arg_names_set, bufnr)
 
   local usages_nodes = {}
   for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do
-    if not ignore_node(filetype, node) then
+    if not util.ignore_node(filetype, node) then
       local arg_name = ts_utils.get_node_text(node, bufnr)[1]
       if arg_names_set[arg_name] then
         table.insert(usages_nodes, node)
