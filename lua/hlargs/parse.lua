@@ -41,11 +41,9 @@ function M.get_arg_usages(body_node, arg_names_set, bufnr)
 
   local usages_nodes = {}
   for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do
-    if not util.ignore_node(filetype, node) then
-      local arg_name = ts_utils.get_node_text(node, bufnr)[1]
-      if arg_names_set[arg_name] then
-        table.insert(usages_nodes, node)
-      end
+    local arg_name = ts_utils.get_node_text(node, bufnr)[1]
+    if arg_names_set[arg_name] and not util.ignore_node(filetype, node) then
+      table.insert(usages_nodes, node)
     end
   end
   return usages_nodes

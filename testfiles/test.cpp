@@ -2,6 +2,19 @@
 #include <vector>
 #include <algorithm>
 
+class MyClass {
+    int arg0;
+    float* arg1;
+    MyClass(int arg0, float* arg1){
+        this->arg0 = arg0;
+        this->arg1 = arg1;
+    }
+
+    int fn(int arg2, char* arg3){
+        return arg2 + arg3[0];
+    }
+};
+
 struct mystr {
     int argc;
 };
