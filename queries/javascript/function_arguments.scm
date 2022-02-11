@@ -1,15 +1,11 @@
-(function_declaration
-  parameters: (formal_parameters
-    (identifier) @argname))
-(method_definition
-  parameters: (formal_parameters
-    (identifier) @argname))
-(function
-  . parameters: (formal_parameters
-    (identifier) @argname))
-(arrow_function
-  . parameters: (formal_parameters
-    (identifier) @argname))
+(formal_parameters
+    (identifier) @argname)
+(formal_parameters
+    (array_pattern
+      (identifier) @argname))
+(formal_parameters
+    (object_pattern
+      (shorthand_property_identifier_pattern) @argname))
 (arrow_function
   . parameter: (identifier) @argname)
 

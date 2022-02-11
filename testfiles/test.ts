@@ -1,14 +1,14 @@
-class C{
-    constructor(props){
+class C extends Object{
+    constructor(props: object){
         super(props)
     }
-    memberFn(arg0){
+    memberFn(arg0 : {run: ()=>void}){
         arg0.run()
     }
 }
 
-function a(arg1, arg2) {
-    log("arg1", arg1.test.arg2) // arg1
+function a(arg1: any, arg2: number) {
+    console.log("arg1", arg1.test.arg2) // arg1
     const foo = arg2() + sub_arg1 + arg3
     const b = function({sub_arg1}, [sub_arg2]) {
         setTimeout(function(sub_sub_arg) { return sub_sub_arg === undefined }, 1000)
@@ -22,6 +22,6 @@ const fn = (arg3) => arg3 + 1
 const fn2 = () => { }
 const fn3 = (arg4) => arg5 => arg4 + arg5 + parseInt(arg4())
 
-const arg4 = 28
+const arg4 = '28'
 parseInt(arg4)
 

@@ -10,6 +10,7 @@ local ignored_field_names = {
 
 local function_types = {
   javascript = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
+  typescript = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
   python = { 'function_definition', 'lambda' },
   lua = { 'function_declaration', 'function_definition' },
   cpp = { 'function_definition', 'lambda_expression' },
