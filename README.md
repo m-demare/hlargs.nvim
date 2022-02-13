@@ -28,7 +28,7 @@ Plug 'm-demare/hlargs.nvim'
 ```
 
 
-## Setup
+## Usage
 
 If you are ok with the default settings:
 ```lua
@@ -49,6 +49,14 @@ require('hlargs').setup {
 }
 ```
 
+If you want to change the color dynamically, you can do that using the highlight group `Hlargs`
+
+After setup, the plugin will be enabled. You can enable/disable/toggle it using:
+```lua
+require('hlargs').enable()
+require('hlargs').disable()
+require('hlargs').toggle()
+```
 
 ## Supported languages
 Currently these languages are supported
@@ -75,5 +83,3 @@ There are a couple of settings to adjust performance to your own use case:
 - `max_iterations` is the maximum amount of functions it will parse. The main objective of this is that it doesn't waste too much time parsing huge minified files, but you can set it lower if your PC struggles with smaller files (default: 400)
 
 I'll be attempting to keep improving performance, but I'm not sure how much better it can get
-
-
