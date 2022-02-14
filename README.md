@@ -27,7 +27,6 @@ Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'm-demare/hlargs.nvim'
 ```
 
-
 ## Usage
 
 If you are ok with the default settings:
@@ -48,6 +47,7 @@ require('hlargs').setup {
   }
 }
 ```
+(You may omit the settings whose defaults you're ok with)
 
 If you want to change the color dynamically, you can do that using the highlight group `Hlargs`
 
@@ -66,6 +66,7 @@ Currently these languages are supported
 - lua
 - python
 - typescript
+- php
 
 Note that you have to install each language's parser using `:TSInstall {lang}`
 
