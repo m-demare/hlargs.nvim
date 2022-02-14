@@ -4,7 +4,7 @@ local ts_utils = require 'nvim-treesitter.ts_utils'
 
 local ignored_field_names = {
   python = {
-    _ = { 'attribute' }
+    _ = { 'attribute', 'name' }
   },
   lua = {
     dot_index_expression = { 'field' },
