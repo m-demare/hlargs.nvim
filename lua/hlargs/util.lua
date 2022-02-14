@@ -3,9 +3,17 @@ local M = {}
 local ts_utils = require 'nvim-treesitter.ts_utils'
 
 local ignored_field_names = {
-  python = { 'attribute' },
-  lua = { 'field' },
-  java = { 'field' }
+  python = {
+    _ = { 'attribute' }
+  },
+  lua = {
+    dot_index_expression = { 'field' },
+    field = { 'name' },
+    _ = {}
+  },
+  java = {
+    _ = { 'field' }
+  }
 }
 
 local function_types = {
@@ -29,8 +37,14 @@ end
 function M.ignore_node(filetype, node)
   if ignored_field_names[filetype] and node:parent() then
     for ch, field_name in node:parent():iter_children() do
-      if ch == node and M.contains(ignored_field_names[filetype], field_name) then
-        return true
+      if ch == node then
+        local ignored_list
+        if ignored_field_names[filetype][node:parent():type()] then
+          ignored_list = ignored_field_names[filetype][node:parent():type()]
+        else
+          ignored_list = ignored_field_names[filetype]['_']
+        end
+        return M.contains(ignored_list, field_name)
       end
     end
   end

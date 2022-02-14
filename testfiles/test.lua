@@ -5,3 +5,9 @@ function fn(arg0)
     end
 end
 
+function fn2(mode)
+   mode = hello
+   local table = { mode = {} }
+   table.mode[mode] = "world"
+end
+
