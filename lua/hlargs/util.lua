@@ -22,7 +22,8 @@ local function_types = {
   python = { 'function_definition', 'lambda' },
   lua = { 'function_declaration', 'function_definition' },
   cpp = { 'function_definition', 'lambda_expression' },
-  java = { 'method_declaration', 'lambda_expression' }
+  java = { 'method_declaration', 'lambda_expression' },
+  php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function' }
 }
 
 function M.contains(arr, val)
@@ -53,7 +54,7 @@ end
 
 function M.get_first_function_parent(filetype, node)
     while node and not M.contains(function_types[filetype], node:type()) do
-        node = node:parent()
+      node = node:parent()
     end
     return node
 end
