@@ -5,18 +5,7 @@ local util = require 'hlargs.util'
 local bufdata = require 'hlargs.bufdata'
 local paint = require 'hlargs.paint'
 
--- TODO volar (se usa en disable)
-local buf_data = {}
 local enabled = false
-
--- TODO volar (se usa en disable)
-local function clear_all(bufnr, nss)
-  for k,ns in ipairs(nss) do
-    if ns then
-      paint.clear(bufnr, ns)
-    end
-  end
-end
 
 local function paint_nodes(bufnr, ns, node_group)
   if not node_group then return end
@@ -42,12 +31,12 @@ function find_and_paint_iteration(bufnr, task, co)
         find_and_paint_iteration(bufnr, task, co)
       end
     else
-      if not vim.api.nvim_buf_is_valid(bufnr) then
-        bufdata.delete_data(bufnr)
-      else
+      if vim.api.nvim_buf_is_valid(bufnr) then
         if not task.stop then
           bufdata.end_task(bufnr, task)
         end
+      else
+        bufdata.delete_data(bufnr)
       end
     end
   end, delay)
@@ -104,7 +93,6 @@ function M.add_range_to_queue(bufnr, from, to)
     -- Higher debouncing for insert mode
     debounce_time = config.performance.debounce.partial_insert_mode
   end
-  -- TODO configurable debounce times
   buf_data.debouncers.range_queue = vim.defer_fn(function ()
     schedule_partial_repaints(bufnr, buf_data)
   end, debounce_time)
@@ -142,8 +130,11 @@ end
 
 function M.buf_enter(bufnr)
   if is_excluded(bufnr) then return end
-
-  M.schedule_total_repaint(bufnr)
+  local buf_data = bufdata.get(bufnr)
+  if not buf_data.initialized then
+    buf_data.initialized = true
+    M.schedule_total_repaint(bufnr)
+  end
 
   vim.api.nvim_buf_attach(bufnr, false, {
     on_lines = function(ev, bufnr, _, from, old_to, to)
@@ -155,6 +146,10 @@ function M.buf_enter(bufnr)
   })
 end
 
+function M.buf_delete(bufnr)
+  bufdata.delete_data(bufnr)
+end
+
 function M.enable()
   if not enabled then
     enabled = true
@@ -162,11 +157,12 @@ function M.enable()
       augroup Hlargs
         autocmd!
         autocmd BufEnter * lua require('hlargs.events').buf_enter(tonumber(vim.fn.expand("<abuf>")))
+        autocmd BufDelete * lua require('hlargs.events').buf_delete(tonumber(vim.fn.expand("<abuf>")))
       augroup end]])
     local bufs = vim.api.nvim_list_bufs()
     for _, b in ipairs(bufs) do
       if vim.api.nvim_buf_is_loaded(b) then
-        buf_enter(b)
+        M.buf_enter(b)
       end
     end
   end
@@ -177,17 +173,18 @@ function M.disable()
     enabled = false
     pcall(vim.cmd, "autocmd! Hlargs")
     pcall(vim.cmd, "augroup! Hlargs")
-    -- TODO
-    for bufnr, data in ipairs(buf_data) do
-      for _, stopper in pairs(data.coroutines.stoppers) do
-        stopper.stop = true
-      end
-      if vim.api.nvim_buf_is_valid(bufnr) then
-        clear_all(bufnr, data.namespaces.to_clean)
-        data.namespaces.to_clean = {}
-      end
-      buf_data[bufnr] = nil
+
+    for bufnr, data in pairs(bufdata.get_all()) do
+      bufdata.delete_data(bufnr)
     end
+  end
+end
+
+function M.toggle()
+  if enabled then
+    M.disable()
+  else
+    M.enable()
   end
 end
 
