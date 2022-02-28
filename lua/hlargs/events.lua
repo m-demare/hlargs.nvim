@@ -26,6 +26,10 @@ local function paint_nodes(bufnr, ns, node_group)
 end
 
 function find_and_paint_iteration(bufnr, task, co)
+  local delay = config.performance.parse_delay
+  if task.type == bufdata.TaskTypes.SLOW then
+    delay = config.performance.slow_parse_delay
+  end
   vim.defer_fn(function()
     if coroutine.status(co) ~= "dead" and not task.stop then
       local marks_ns = bufdata.get(bufnr).marks_ns
@@ -46,7 +50,7 @@ function find_and_paint_iteration(bufnr, task, co)
         end
       end
     end
-  end, config.performance.parse_delay)
+  end, delay)
 end
 
 function is_excluded(bufnr)
@@ -54,11 +58,11 @@ function is_excluded(bufnr)
   return util.contains(config.excluded_filetypes, filetype)
 end
 
-function M.find_and_paint_nodes(bufnr, mark)
+function M.find_and_paint_nodes(bufnr, task_type, mark)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   if not enabled or is_excluded(bufnr) then return end
 
-  local task = bufdata.new_task(bufnr, mark)
+  local task = bufdata.new_task(bufnr, task_type, mark)
   if not task then return end
 
   local co = coroutine.create(parser.get_nodes_to_paint)
@@ -66,6 +70,9 @@ function M.find_and_paint_nodes(bufnr, mark)
 end
 
 local function schedule_partial_repaints(bufnr, buf_data)
+  if not vim.api.nvim_buf_is_valid(bufnr) then
+    return
+  end
   buf_data.ranges_to_parse = util.merge_ranges(bufnr, buf_data.marks_ns, buf_data.ranges_to_parse)
 
   if config.performance.max_concurrent_partial_parses ~= 0 and
@@ -77,7 +84,7 @@ local function schedule_partial_repaints(bufnr, buf_data)
   end
 
   for _, r in ipairs(buf_data.ranges_to_parse) do
-    M.find_and_paint_nodes(bufnr, r)
+    M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.PARTIAL, r)
   end
   buf_data.ranges_to_parse = {}
 end
@@ -105,14 +112,32 @@ end
 
 function M.schedule_total_repaint(bufnr)
   if not enabled or is_excluded(bufnr) then return end
+  if bufdata.total_parse_is_running(bufnr) then
+    -- Don't want to run multiple total repaints simultaneously
+    M.schedule_slow_repaint(bufnr)
+    return
+  end
 
   local buf_data = bufdata.get(bufnr)
   if buf_data.debouncers.total_parse then
     vim.loop.timer_stop(buf_data.debouncers.total_parse)
   end
   buf_data.debouncers.total_parse = vim.defer_fn(function ()
-    M.find_and_paint_nodes(bufnr)
+    M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.TOTAL)
   end, config.performance.debounce.total_parse)
+end
+
+function M.schedule_slow_repaint(bufnr)
+  if not enabled or is_excluded(bufnr) then return end
+
+  local buf_data = bufdata.get(bufnr)
+  if buf_data.debouncers.slow_parse then
+    vim.loop.timer_stop(buf_data.debouncers.slow_parse)
+  end
+  buf_data.debouncers.slow_parse = vim.defer_fn(function ()
+    M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.SLOW)
+  end, config.performance.debounce.slow_parse)
+
 end
 
 function M.buf_enter(bufnr)
