@@ -54,10 +54,52 @@ function M.ignore_node(filetype, node)
 end
 
 function M.get_first_function_parent(filetype, node)
-    while node and not M.contains(function_types[filetype], node:type()) do
-      node = node:parent()
+  while node and not M.contains(function_types[filetype], node:type()) do
+    node = node:parent()
+  end
+  return node
+end
+
+function M.get_marks_limits(bufnr, marks_ns, extmark)
+  local mark_data = vim.api.nvim_buf_get_extmark_by_id(bufnr, marks_ns, extmark, {details=true})
+  return mark_data[1], mark_data[3].end_row
+end
+
+-- Merges overlapping (or non overlapping, but
+-- separated by up to a line) ranges in a list
+function M.merge_ranges(bufnr, marks_ns, ranges)
+  if #ranges == 0 then return ranges end
+
+  -- Sort by ranges' start position
+  table.sort(ranges, function(a, b)
+    a = M.get_marks_limits(bufnr, marks_ns, a)
+    b = M.get_marks_limits(bufnr, marks_ns, b)
+    return a < b
+  end)
+
+  local last_added = ranges[1]
+  local merged_ranges = { last_added }
+  for i = 2, #ranges do
+    local next = ranges[i]
+    local last_start, last_end = M.get_marks_limits(bufnr, marks_ns, last_added)
+    local next_start, next_end = M.get_marks_limits(bufnr, marks_ns, next)
+
+    if last_end + 2 < next_start then
+      table.insert(merged_ranges, next)
+      last_added = next
+    else
+      if next_end > last_end then
+        vim.api.nvim_buf_set_extmark(bufnr, marks_ns, last_start, 0, {
+          id = last_added,
+          end_row = next_end,
+          end_col = 0
+        })
+      end
+      vim.api.nvim_buf_del_extmark(bufnr, marks_ns, next)
     end
-    return node
+  end
+
+  return merged_ranges
 end
 
 function M.i(...)

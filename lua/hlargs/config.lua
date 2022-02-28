@@ -7,7 +7,12 @@ local defaults = {
   paint_arg_usages = true,
   performance = {
     parse_delay = 1,
-    max_iterations = 400
+    max_iterations = 400,
+    debounce = {
+      partial_parse = 3,
+      partial_insert_mode = 500,
+      total_parse = 700
+    }
   }
 }
 
