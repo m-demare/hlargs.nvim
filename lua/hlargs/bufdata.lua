@@ -4,6 +4,12 @@ local paint = require 'hlargs.paint'
 
 local data = {}
 
+M.TaskTypes = {
+  PARTIAL = 1,
+  TOTAL = 2,
+  SLOW = 3
+}
+
 function M.get(bufnr)
   data[bufnr] = data[bufnr] or {
     dirty = false,
@@ -17,7 +23,7 @@ function M.get(bufnr)
   return data[bufnr]
 end
 
-function M.new_task(bufnr, mark)
+function M.new_task(bufnr, type, mark)
   local buf_data = M.get(bufnr)
   buf_data.change_idx = buf_data.change_idx + 1
   buf_data.dirty = true
@@ -26,24 +32,22 @@ function M.new_task(bufnr, mark)
     mark = mark,
     change_idx = buf_data.change_idx,
     ns = vim.api.nvim_create_namespace(''),
-    stop = false
+    stop = false,
+    type = type
   }
-
-  if not mark then
-    M.stop_total_parses(bufnr)
-  end
 
   table.insert(buf_data.tasks, task)
   return task
 end
 
-function M.stop_total_parses(bufnr)
+function M.total_parse_is_running(bufnr)
   local buf_data = M.get(bufnr)
   for _, t in ipairs(buf_data.tasks) do
-    if not t.mark then
-      t.stop = true
+    if t.type == M.TaskTypes.TOTAL then
+      return true
     end
   end
+  return false
 end
 
 function M.end_task(bufnr, task)
