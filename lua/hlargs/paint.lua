@@ -1,4 +1,5 @@
 local M = {}
+local config = require 'hlargs.config'.opts
 
 -- Clears a namespace within limits
 -- (or in the entire buffer if limits is nil)
@@ -29,16 +30,14 @@ function M.combine_nss(bufnr, dst, src, limits)
   local ok, extmarks = pcall(vim.api.nvim_buf_get_extmarks, bufnr, src, from, to, { details = true })
   for _, extmark in ipairs(extmarks) do
     local start_row, start_col, end_row, end_col = extmark[2], extmark[3], extmark[4].end_row, extmark[4].end_col
-    M.set_extmark(bufnr, dst, start_row, start_col, end_row, end_col, 'Hlargs', 10000)
-    -- TODO configurable hl_group and priority
+    M.set_extmark(bufnr, dst, start_row, start_col, end_row, end_col, config.hl_group, config.hl_priority)
   end
 end
 
 setmetatable(M, {
   __call = function (self, bufnr, ns, node)
     local start_row, start_col, end_row, end_col = node:range()
-    M.set_extmark(bufnr, ns, start_row, start_col, end_row, end_col, 'Hlargs', 10000)
-    -- TODO configurable hl_group and priority
+    M.set_extmark(bufnr, ns, start_row, start_col, end_row, end_col, config.hl_group, config.hl_priority)
   end
 })
 
