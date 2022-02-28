@@ -12,21 +12,24 @@ M.TaskTypes = {
 
 function M.get(bufnr)
   data[bufnr] = data[bufnr] or {
-    dirty = false,
     change_idx = 0,
     tasks = {},
     debouncers = {},
     ranges_to_parse = {},
     main_ns = vim.api.nvim_create_namespace(''),
-    marks_ns = vim.api.nvim_create_namespace('')
+    marks_ns = vim.api.nvim_create_namespace(''),
+    initialized = false
   }
   return data[bufnr]
+end
+
+function M.get_all()
+  return data
 end
 
 function M.new_task(bufnr, type, mark)
   local buf_data = M.get(bufnr)
   buf_data.change_idx = buf_data.change_idx + 1
-  buf_data.dirty = true
 
   local task = {
     mark = mark,
@@ -85,9 +88,20 @@ function M.end_task(bufnr, task)
   end
 end
 
+-- Gets called on disable / BufDelete
 function M.delete_data(bufnr)
+  if data[bufnr] == nil then return end
+  for _, t in ipairs(data[bufnr].tasks) do
+    t.stop = true
+    if vim.api.nvim_buf_is_valid(bufnr) then
+      vim.api.nvim_buf_del_extmark(bufnr, data[bufnr].marks_ns, t.mark)
+      paint.clear(bufnr, t.ns)
+    end
+  end
+  if vim.api.nvim_buf_is_valid(bufnr) then
+    paint.clear(bufnr, data[bufnr].main_ns)
+  end
   data[bufnr] = nil
-  -- TODO limpiar namespaces y marks si todavía es válido el bufnr
 end
 
 function M.debug()

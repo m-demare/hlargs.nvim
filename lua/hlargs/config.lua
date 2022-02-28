@@ -5,6 +5,8 @@ local defaults = {
   excluded_filetypes = {},
   paint_arg_declarations = true,
   paint_arg_usages = true,
+  hl_group = 'Hlargs',
+  hl_priority = 10000,
   performance = {
     parse_delay = 1,
     slow_parse_delay = 50,
@@ -20,8 +22,8 @@ local defaults = {
 
 function M.setup(opts)
   M.opts = vim.tbl_deep_extend("force", {}, defaults, opts or {})
-  vim.cmd("highlight clear Hlargs")
-  vim.cmd("highlight! def Hlargs guifg=" .. M.opts.color)
+  vim.cmd("highlight clear " .. M.opts.hl_group)
+  vim.cmd("highlight! def " .. M.opts.hl_group .. " guifg=" .. M.opts.color)
 end
 
 M.setup()
