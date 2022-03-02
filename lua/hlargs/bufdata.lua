@@ -36,7 +36,8 @@ function M.new_task(bufnr, type, mark)
     change_idx = buf_data.change_idx,
     ns = vim.api.nvim_create_namespace(''),
     stop = false,
-    type = type
+    type = type,
+    stopped_tasks = {}
   }
 
   table.insert(buf_data.tasks, task)
@@ -51,6 +52,17 @@ function M.total_parse_is_running(bufnr)
     end
   end
   return false
+end
+
+local function clean_stopped_tasks(bufnr, buf_data, task)
+  if not task.stopped_tasks then return end
+  for _, t in ipairs(task.stopped_tasks) do
+    if t.mark then
+      vim.api.nvim_buf_del_extmark(bufnr, buf_data.marks_ns, t.mark)
+    end
+    paint.clear(bufnr, t.ns)
+    clean_stopped_tasks(bufnr, buf_data, t)
+  end
 end
 
 function M.end_task(bufnr, task)
@@ -81,9 +93,31 @@ function M.end_task(bufnr, task)
   if task.mark then
     vim.api.nvim_buf_del_extmark(bufnr, buf_data.marks_ns, task.mark)
   end
+  clean_stopped_tasks(bufnr, buf_data, task)
   for i = #buf_data.tasks, 1, -1 do
     if buf_data.tasks[i] == task then
       table.remove(buf_data.tasks, i)
+    end
+  end
+end
+
+function M.stop_older_contained(bufnr, task)
+  local buf_data = M.get(bufnr)
+  local range_start, range_end = util.get_marks_limits(bufnr, buf_data.marks_ns, task.mark)
+  for _, t in ipairs(buf_data.tasks) do
+    if t.change_idx < task.change_idx and t.mark then
+      local t_start, t_end = util.get_marks_limits(bufnr, buf_data.marks_ns, task.mark)
+      if t_start >= range_start and t_end <= range_end then
+        t.stop = true
+        -- I remove it from the tasklist, but keep a reference
+        -- to it to later clean the namespaces
+        table.insert(task.stopped_tasks, t)
+        for i = #buf_data.tasks, 1, -1 do
+          if buf_data.tasks[i] == t then
+            table.remove(buf_data.tasks, i)
+          end
+        end
+      end
     end
   end
 end
@@ -94,7 +128,9 @@ function M.delete_data(bufnr)
   for _, t in ipairs(data[bufnr].tasks) do
     t.stop = true
     if vim.api.nvim_buf_is_valid(bufnr) then
-      vim.api.nvim_buf_del_extmark(bufnr, data[bufnr].marks_ns, t.mark)
+      if t.mark then
+        vim.api.nvim_buf_del_extmark(bufnr, data[bufnr].marks_ns, t.mark)
+      end
       paint.clear(bufnr, t.ns)
     end
   end
