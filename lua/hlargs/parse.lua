@@ -57,7 +57,7 @@ function M.get_arg_usages(bufnr, body_node, arg_names_set, limits)
   local query = queries.get_query(filetype, 'variables')
 
   local start_row, _, end_row, _ = body_node:range()
-  if limits then start_row, end_row = limits[1], limits[2] end
+  if limits then start_row, end_row = limits[1], limits[2]-1 end
 
   local usages_nodes = {}
   for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do

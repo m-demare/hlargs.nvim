@@ -23,6 +23,12 @@ function find_and_paint_iteration(bufnr, task, co)
     if coroutine.status(co) ~= "dead" and not task.stop then
       local marks_ns = bufdata.get(bufnr).marks_ns
       local running, arg_nodes, usage_nodes = coroutine.resume(co, bufnr, marks_ns, task.mark)
+      if task.mark then
+        -- Mainly to prevent tasks from insert mode from accumulating
+        -- Can't do this on new_task because the tasks' marks
+        -- get modified during the parsing
+        bufdata.stop_older_contained(bufnr, task)
+      end
       if running then
         if config.paint_arg_declarations then
           paint_nodes(bufnr, task.ns, arg_nodes)
@@ -65,8 +71,11 @@ local function schedule_partial_repaints(bufnr, buf_data)
   buf_data.ranges_to_parse = util.merge_ranges(bufnr, buf_data.marks_ns, buf_data.ranges_to_parse)
 
   if config.performance.max_concurrent_partial_parses ~= 0 and
-    #buf_data.ranges_to_parse + #buf_data.tasks == config.performance.max_concurrent_partial_parses
+    #buf_data.ranges_to_parse + #buf_data.tasks > config.performance.max_concurrent_partial_parses
   then
+    for _, mark in ipairs(buf_data.ranges_to_parse) do
+      vim.api.nvim_buf_del_extmark(bufnr, buf_data.marks_ns, mark)
+    end
     buf_data.ranges_to_parse = {}
     M.schedule_total_repaint(bufnr)
     return
@@ -76,12 +85,21 @@ local function schedule_partial_repaints(bufnr, buf_data)
     M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.PARTIAL, r)
   end
   buf_data.ranges_to_parse = {}
+  M.schedule_slow_repaint(bufnr)
 end
 
 function M.add_range_to_queue(bufnr, from, to)
   if not enabled or is_excluded(bufnr) then return end
 
   local buf_data = bufdata.get(bufnr)
+
+  -- `merge_ranges` won't be able to get the number under `max_concurrent_partial_parses` anyway,
+  -- and creating this many extmarks would be pointless
+  if #buf_data.ranges_to_parse + #buf_data.tasks >= config.performance.max_concurrent_partial_parses * 5 then
+    M.schedule_total_repaint(bufnr)
+    return
+  end
+
   local range = paint.set_extmark(bufnr, buf_data.marks_ns, from, 0, to, 0)
   table.insert(buf_data.ranges_to_parse, range)
 
