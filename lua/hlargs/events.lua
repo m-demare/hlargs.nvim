@@ -4,6 +4,7 @@ local config = require 'hlargs.config'.opts
 local util = require 'hlargs.util'
 local bufdata = require 'hlargs.bufdata'
 local paint = require 'hlargs.paint'
+local queries = require 'vim.treesitter.query'
 
 local enabled = false
 
@@ -151,8 +152,14 @@ function M.buf_enter(bufnr)
   local buf_data = bufdata.get(bufnr)
   if not buf_data.initialized then
     buf_data.initialized = true
-    M.schedule_total_repaint(bufnr)
+    local filetype = vim.fn.getbufvar(bufnr, '&filetype')
+    local ok, query = pcall(queries.get_query, filetype, 'function_arguments')
+    buf_data.ignore = not ok or query == nil
+    if not buf_data.ignore then
+      M.schedule_total_repaint(bufnr)
+    end
   end
+  if buf_data.ignore then return end
 
   vim.api.nvim_buf_attach(bufnr, false, {
     on_lines = function(ev, bufnr, _, from, old_to, to)
