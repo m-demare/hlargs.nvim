@@ -98,7 +98,7 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
     local name = query.captures[id] -- name of the capture
     local arg_nodes, arg_names_set = M.get_args(bufnr, node)
     local usages_nodes = {}
-    if config.opts.paint_arg_usages then
+    if config.opts.paint_arg_usages and #arg_nodes>0 then
       local body_node = M.get_body_node(bufnr, node)
       local limits = nil
       if mark then
