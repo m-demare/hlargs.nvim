@@ -67,6 +67,7 @@ Currently these languages are supported
 - python
 - typescript
 - php
+- zig
 
 Note that you have to install each language's parser using `:TSInstall {lang}`
 
