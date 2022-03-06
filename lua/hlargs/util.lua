@@ -23,7 +23,8 @@ local function_types = {
   lua = { 'function_declaration', 'function_definition' },
   cpp = { 'function_definition', 'lambda_expression' },
   java = { 'method_declaration', 'lambda_expression' },
-  php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function' }
+  php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function' },
+  zig = { 'TopLevelDecl'}
 }
 
 function M.contains(arr, val)
