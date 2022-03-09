@@ -9,7 +9,7 @@ local parsers = require 'nvim-treesitter.parsers'
 
 -- If arguments were modified, the whole function has to be reparsed
 function fix_mark(bufnr, marks_ns, root_node, mark)
-  local filetype = vim.fn.getbufvar(bufnr, '&filetype')
+  local filetype = util.get_filetype(bufnr)
   local query = queries.get_query(filetype, 'function_arguments')
   local orig_from, orig_to = util.get_marks_limits(bufnr, marks_ns, mark)
   local new_from, new_to = orig_from, orig_to
@@ -26,7 +26,7 @@ function fix_mark(bufnr, marks_ns, root_node, mark)
 end
 
 function M.get_args(bufnr, func_node)
-  local filetype = vim.fn.getbufvar(bufnr, '&filetype')
+  local filetype = util.get_filetype(bufnr)
   local query = queries.get_query(filetype, 'function_arguments')
 
   local start_row, _, end_row, _ = func_node:range()
@@ -43,7 +43,7 @@ function M.get_args(bufnr, func_node)
 end
 
 function M.get_body_node(bufnr, func_node)
-  local filetype = vim.fn.getbufvar(bufnr, '&filetype')
+  local filetype = util.get_filetype(bufnr)
   local query = queries.get_query(filetype, 'function_body')
 
   local start_row, _, end_row, _ = func_node:range()
@@ -53,7 +53,7 @@ function M.get_body_node(bufnr, func_node)
 end
 
 function M.get_arg_usages(bufnr, body_node, arg_names_set, limits)
-  local filetype = vim.fn.getbufvar(bufnr, '&filetype')
+  local filetype = util.get_filetype(bufnr)
   local query = queries.get_query(filetype, 'variables')
 
   local start_row, _, end_row, _ = body_node:range()
@@ -70,14 +70,12 @@ function M.get_arg_usages(bufnr, body_node, arg_names_set, limits)
 end
 
 function M.get_nodes_to_paint(bufnr, marks_ns, mark)
-  local filetype = vim.fn.getbufvar(bufnr, '&filetype')
+  local filetype = util.get_filetype(bufnr)
   local query = queries.get_query(filetype, 'function_definition')
   if query == nil then
     return
   end
 
-  -- TODO fix jsx/tsx
-  filetype = parsers.ft_to_lang(filetype)
   local parser = ts.get_parser(bufnr, filetype)
   local syntax_tree = parser:parse()
   local root = syntax_tree[1]:root()
