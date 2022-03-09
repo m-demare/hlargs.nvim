@@ -50,6 +50,8 @@ function find_and_paint_iteration(bufnr, task, co)
 end
 
 function is_excluded(bufnr)
+  -- For excluded_filetypes, I use actual filetypes instead
+  -- of ft_to_lang, it makes more sense
   local filetype = vim.fn.getbufvar(bufnr, '&filetype')
   return util.contains(config.excluded_filetypes, filetype)
 end
@@ -152,9 +154,10 @@ function M.buf_enter(bufnr)
   local buf_data = bufdata.get(bufnr)
   if not buf_data.initialized then
     buf_data.initialized = true
-    local filetype = vim.fn.getbufvar(bufnr, '&filetype')
+    local filetype = util.get_filetype(bufnr)
     local ok, query = pcall(queries.get_query, filetype, 'function_arguments')
     buf_data.ignore = not ok or query == nil
+    buf_data.filetype = filetype
     if not buf_data.ignore then
       M.schedule_total_repaint(bufnr)
     end
@@ -171,6 +174,14 @@ function M.buf_enter(bufnr)
   })
 end
 
+function M.filetype(bufnr, ft)
+  local buf_data = bufdata.get(bufnr)
+  if buf_data.initialized and buf_data.filetype ~= ft then
+    M.buf_delete(bufnr)
+    M.buf_enter(bufnr)
+  end
+end
+
 function M.buf_delete(bufnr)
   bufdata.delete_data(bufnr)
 end
@@ -182,6 +193,7 @@ function M.enable()
       augroup Hlargs
         autocmd!
         autocmd BufEnter * lua require('hlargs.events').buf_enter(tonumber(vim.fn.expand("<abuf>")))
+        autocmd FileType * lua require('hlargs.events').filetype(tonumber(vim.fn.expand("<abuf>")), vim.fn.expand("<amatch>"))
         autocmd BufDelete * lua require('hlargs.events').buf_delete(tonumber(vim.fn.expand("<abuf>")))
       augroup end]])
     local bufs = vim.api.nvim_list_bufs()
