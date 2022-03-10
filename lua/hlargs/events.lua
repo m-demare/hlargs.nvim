@@ -53,7 +53,7 @@ function is_excluded(bufnr)
   -- For excluded_filetypes, I use actual filetypes instead
   -- of ft_to_lang, it makes more sense
   local filetype = vim.fn.getbufvar(bufnr, '&filetype')
-  return util.contains(config.excluded_filetypes, filetype)
+  return vim.tbl_contains(config.excluded_filetypes, filetype)
 end
 
 function M.find_and_paint_nodes(bufnr, task_type, mark)

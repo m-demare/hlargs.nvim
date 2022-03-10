@@ -27,15 +27,6 @@ local function_types = {
   php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function' }
 }
 
-function M.contains(arr, val)
-  for i, value in ipairs(arr) do
-      if value == val then
-          return true
-      end
-  end
-  return false
-end
-
 function M.ignore_node(filetype, node)
   if ignored_field_names[filetype] and node:parent() then
     for ch, field_name in node:parent():iter_children() do
@@ -46,7 +37,7 @@ function M.ignore_node(filetype, node)
         else
           ignored_list = ignored_field_names[filetype]['_']
         end
-        return M.contains(ignored_list, field_name)
+        return vim.tbl_contains(ignored_list, field_name)
       end
     end
   end
@@ -54,7 +45,7 @@ function M.ignore_node(filetype, node)
 end
 
 function M.get_first_function_parent(filetype, node)
-  while node and not M.contains(function_types[filetype], node:type()) do
+  while node and not vim.tbl_contains(function_types[filetype], node:type()) do
     node = node:parent()
   end
   return node
@@ -93,6 +84,7 @@ function M.merge_ranges(bufnr, marks_ns, ranges)
         -- For some reason, this call might fail with `end_row value outside range`,
         -- even though end_row literally comes from another extmark (and acording to
         -- logs, it is within range)
+        -- Strict=false might fix this (https://github.com/neovim/neovim/pull/17001)
         -- I couldn't reproduce this consistently
         local ok, _ = pcall(vim.api.nvim_buf_set_extmark, bufnr, marks_ns, last_start, 0, {
           id = last_added,

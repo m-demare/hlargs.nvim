@@ -79,7 +79,6 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
   local parser = ts.get_parser(bufnr, filetype)
   local syntax_tree = parser:parse()
   local root = syntax_tree[1]:root()
-  -- util.i(getmetatable(syntax_tree[1]))
 
   local start_row, _, end_row, _ = root:range()
   if mark then
@@ -103,7 +102,10 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
         local from, to = util.get_marks_limits(bufnr, marks_ns, mark)
         limits = { from, to }
       end
-      usages_nodes = M.get_arg_usages(bufnr, body_node, arg_names_set, limits)
+      if body_node then
+        -- So that empty functions don't fail
+        usages_nodes = M.get_arg_usages(bufnr, body_node, arg_names_set, limits)
+      end
     end
     coroutine.yield(arg_nodes, usages_nodes)
   end
