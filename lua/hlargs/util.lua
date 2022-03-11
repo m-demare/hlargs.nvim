@@ -18,13 +18,15 @@ local ignored_field_names = {
 }
 
 local function_types = {
-  javascript = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
-  typescript = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
-  python = { 'function_definition', 'lambda' },
-  lua = { 'function_declaration', 'function_definition' },
   cpp = { 'function_definition', 'lambda_expression' },
   java = { 'method_declaration', 'lambda_expression' },
+  javascript = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
+  jsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
+  lua = { 'function_declaration', 'function_definition' },
   php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function' },
+  python = { 'function_definition', 'lambda' },
+  tsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
+  typescript = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
   zig = { 'TopLevelDecl'}
 }
 
