@@ -73,6 +73,7 @@ Note: If you want to change the color dynamically, you can do that using the hig
 
 ## Supported languages
 Currently these languages are supported
+- c
 - cpp
 - java
 - javascript
