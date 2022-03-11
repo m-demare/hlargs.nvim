@@ -76,10 +76,12 @@ Currently these languages are supported
 - cpp
 - java
 - javascript
+- jsx (react)
 - lua
-- python
-- typescript
 - php
+- python
+- tsx (react)
+- typescript
 - zig
 
 Note that you have to install each language's parser using `:TSInstall {lang}`

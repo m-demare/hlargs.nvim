@@ -6,6 +6,13 @@
 (formal_parameters
     (object_pattern
       (shorthand_property_identifier_pattern) @argname))
+(formal_parameters
+  (object_pattern
+    (pair_pattern
+      value: (identifier) @argname)))
+(formal_parameters
+  (assignment_pattern
+    left: (identifier) @definition.parameter))
 (arrow_function
   . parameter: (identifier) @argname)
 
