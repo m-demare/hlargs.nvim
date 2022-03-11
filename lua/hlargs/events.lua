@@ -157,7 +157,7 @@ function M.buf_enter(bufnr)
     local filetype = util.get_filetype(bufnr)
     local ok, query = pcall(queries.get_query, filetype, 'function_arguments')
     buf_data.ignore = not ok or query == nil
-    buf_data.filetype = filetype
+    buf_data.filetype = vim.fn.getbufvar(bufnr, '&filetype')
     if not buf_data.ignore then
       M.schedule_total_repaint(bufnr)
     end
