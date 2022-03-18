@@ -20,6 +20,7 @@ local ignored_field_names = {
 local function_types = {
   c = { 'function_definition' },
   cpp = { 'function_definition', 'lambda_expression' },
+  go = { 'function_declaration', 'method_declaration', 'func_literal' },
   java = { 'method_declaration', 'lambda_expression' },
   javascript = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
   jsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
