@@ -75,6 +75,7 @@ Note: If you want to change the color dynamically, you can do that using the hig
 Currently these languages are supported
 - c
 - cpp
+- go
 - java
 - javascript
 - jsx (react)
