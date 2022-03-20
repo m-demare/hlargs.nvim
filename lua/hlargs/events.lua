@@ -10,12 +10,12 @@ local enabled = false
 
 local function paint_nodes(bufnr, ns, node_group)
   if not node_group then return end
-  for i, node in ipairs(node_group) do
+  for _, node in ipairs(node_group) do
     paint(bufnr, ns, node)
   end
 end
 
-function find_and_paint_iteration(bufnr, task, co)
+local function find_and_paint_iteration(bufnr, task, co)
   local delay = config.performance.parse_delay
   if task.type == bufdata.TaskTypes.SLOW then
     delay = config.performance.slow_parse_delay
@@ -49,7 +49,7 @@ function find_and_paint_iteration(bufnr, task, co)
   end, delay)
 end
 
-function is_excluded(bufnr)
+local function is_excluded(bufnr)
   -- For excluded_filetypes, I use actual filetypes instead
   -- of ft_to_lang, it makes more sense
   local filetype = vim.fn.getbufvar(bufnr, '&filetype')
@@ -119,7 +119,7 @@ function M.add_range_to_queue(bufnr, from, to)
   end, debounce_time)
 end
 
-function M.schedule_total_repaint(bufnr)
+function M.schedule_total_repaint(bufnr, ignore_debounce)
   if not enabled or is_excluded(bufnr) then return end
   if bufdata.total_parse_is_running(bufnr) then
     -- Don't want to run multiple total repaints simultaneously
@@ -131,9 +131,13 @@ function M.schedule_total_repaint(bufnr)
   if buf_data.debouncers.total_parse then
     vim.loop.timer_stop(buf_data.debouncers.total_parse)
   end
-  buf_data.debouncers.total_parse = vim.defer_fn(function ()
+  if ignore_debounce then
     M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.TOTAL)
-  end, config.performance.debounce.total_parse)
+  else
+    buf_data.debouncers.total_parse = vim.defer_fn(function ()
+      M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.TOTAL)
+    end, config.performance.debounce.total_parse)
+  end
 end
 
 function M.schedule_slow_repaint(bufnr)
@@ -159,7 +163,7 @@ function M.buf_enter(bufnr)
     buf_data.ignore = not ok or query == nil
     buf_data.filetype = vim.fn.getbufvar(bufnr, '&filetype')
     if not buf_data.ignore then
-      M.schedule_total_repaint(bufnr)
+      M.schedule_total_repaint(bufnr, true)
     end
   end
   if buf_data.ignore then return end
