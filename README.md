@@ -82,11 +82,15 @@ Currently these languages are supported
 - lua
 - php
 - python
+- rust
 - tsx (react)
 - typescript
 - zig
 
 Note that you have to install each language's parser using `:TSInstall {lang}`
+
+`jsx` parser gets installed with the `javascript` one, but `tsx` parser is independent from the
+`typescript` one
 
 ### Request new language
 Please include a sample file with your request, that covers most of the edge cases that specific
