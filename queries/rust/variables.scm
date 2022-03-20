@@ -1,0 +1,2 @@
+(identifier) @var
+

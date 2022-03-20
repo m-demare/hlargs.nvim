@@ -27,6 +27,7 @@ local function_types = {
   lua = { 'function_declaration', 'function_definition' },
   php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function' },
   python = { 'function_definition', 'lambda' },
+  rust = { 'function_item' },
   tsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
   typescript = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
   zig = { 'TopLevelDecl'}
