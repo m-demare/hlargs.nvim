@@ -85,6 +85,7 @@ Currently these languages are supported
 - rust
 - tsx (react)
 - typescript
+- vim
 - zig
 
 Note that you have to install each language's parser using `:TSInstall {lang}`

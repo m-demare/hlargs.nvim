@@ -9,11 +9,13 @@ local ignored_field_names = {
   },
   lua = {
     dot_index_expression = { 'field' },
-    field = { 'name' },
-    _ = {}
+    field = { 'name' }
   },
   java = {
     _ = { 'field' }
+  },
+  vim = {
+    scoped_identifier = { '_' }
   }
 }
 
@@ -30,6 +32,7 @@ local function_types = {
   rust = { 'function_item' },
   tsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
   typescript = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
+  vim = { 'function_definition', 'lambda_expression' },
   zig = { 'TopLevelDecl'}
 }
 
@@ -41,9 +44,9 @@ function M.ignore_node(filetype, node)
         if ignored_field_names[filetype][node:parent():type()] then
           ignored_list = ignored_field_names[filetype][node:parent():type()]
         else
-          ignored_list = ignored_field_names[filetype]['_']
+          ignored_list = ignored_field_names[filetype]['_'] or {}
         end
-        return vim.tbl_contains(ignored_list, field_name)
+        return vim.tbl_contains(ignored_list, field_name) or vim.tbl_contains(ignored_list, '_')
       end
     end
   end
