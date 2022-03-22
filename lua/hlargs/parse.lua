@@ -5,10 +5,9 @@ local ts_utils = require 'nvim-treesitter.ts_utils'
 local queries = require 'vim.treesitter.query'
 local config = require 'hlargs.config'
 local util = require 'hlargs.util'
-local parsers = require 'nvim-treesitter.parsers'
 
 -- If arguments were modified, the whole function has to be reparsed
-function fix_mark(bufnr, marks_ns, root_node, mark)
+local function fix_mark(bufnr, marks_ns, root_node, mark)
   local filetype = util.get_filetype(bufnr)
   local query = queries.get_query(filetype, 'function_arguments')
   local orig_from, orig_to = util.get_marks_limits(bufnr, marks_ns, mark)
