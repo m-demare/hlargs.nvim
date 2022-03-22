@@ -1,6 +1,6 @@
 local M = {}
 local parser = require 'hlargs.parse'
-local config = require 'hlargs.config'.opts
+local config = require 'hlargs.config'
 local util = require 'hlargs.util'
 local bufdata = require 'hlargs.bufdata'
 local paint = require 'hlargs.paint'
@@ -16,9 +16,9 @@ local function paint_nodes(bufnr, ns, node_group)
 end
 
 local function find_and_paint_iteration(bufnr, task, co)
-  local delay = config.performance.parse_delay
+  local delay = config.opts.performance.parse_delay
   if task.type == bufdata.TaskTypes.SLOW then
-    delay = config.performance.slow_parse_delay
+    delay = config.opts.performance.slow_parse_delay
   end
   vim.defer_fn(function()
     if coroutine.status(co) ~= "dead" and not task.stop then
@@ -31,7 +31,7 @@ local function find_and_paint_iteration(bufnr, task, co)
         bufdata.stop_older_contained(bufnr, task)
       end
       if running then
-        if config.paint_arg_declarations then
+        if config.opts.paint_arg_declarations then
           paint_nodes(bufnr, task.ns, arg_nodes)
         end
         paint_nodes(bufnr, task.ns, usage_nodes)
@@ -53,7 +53,7 @@ local function is_excluded(bufnr)
   -- For excluded_filetypes, I use actual filetypes instead
   -- of ft_to_lang, it makes more sense
   local filetype = vim.fn.getbufvar(bufnr, '&filetype')
-  return vim.tbl_contains(config.excluded_filetypes, filetype)
+  return vim.tbl_contains(config.opts.excluded_filetypes, filetype)
 end
 
 function M.find_and_paint_nodes(bufnr, task_type, mark)
@@ -73,8 +73,8 @@ local function schedule_partial_repaints(bufnr, buf_data)
   end
   buf_data.ranges_to_parse = util.merge_ranges(bufnr, buf_data.marks_ns, buf_data.ranges_to_parse)
 
-  if config.performance.max_concurrent_partial_parses ~= 0 and
-    #buf_data.ranges_to_parse + #buf_data.tasks > config.performance.max_concurrent_partial_parses
+  if config.opts.performance.max_concurrent_partial_parses ~= 0 and
+    #buf_data.ranges_to_parse + #buf_data.tasks > config.opts.performance.max_concurrent_partial_parses
   then
     for _, mark in ipairs(buf_data.ranges_to_parse) do
       vim.api.nvim_buf_del_extmark(bufnr, buf_data.marks_ns, mark)
@@ -98,7 +98,7 @@ function M.add_range_to_queue(bufnr, from, to)
 
   -- `merge_ranges` won't be able to get the number under `max_concurrent_partial_parses` anyway,
   -- and creating this many extmarks would be pointless
-  if #buf_data.ranges_to_parse + #buf_data.tasks >= config.performance.max_concurrent_partial_parses * 5 then
+  if #buf_data.ranges_to_parse + #buf_data.tasks >= config.opts.performance.max_concurrent_partial_parses * 5 then
     M.schedule_total_repaint(bufnr)
     return
   end
@@ -109,10 +109,10 @@ function M.add_range_to_queue(bufnr, from, to)
   if buf_data.debouncers.range_queue then
     vim.loop.timer_stop(buf_data.debouncers.range_queue)
   end
-  local debounce_time = config.performance.debounce.partial_parse
+  local debounce_time = config.opts.performance.debounce.partial_parse
   if string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i' then
     -- Higher debouncing for insert mode
-    debounce_time = config.performance.debounce.partial_insert_mode
+    debounce_time = config.opts.performance.debounce.partial_insert_mode
   end
   buf_data.debouncers.range_queue = vim.defer_fn(function ()
     schedule_partial_repaints(bufnr, buf_data)
@@ -136,7 +136,7 @@ function M.schedule_total_repaint(bufnr, ignore_debounce)
   else
     buf_data.debouncers.total_parse = vim.defer_fn(function ()
       M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.TOTAL)
-    end, config.performance.debounce.total_parse)
+    end, config.opts.performance.debounce.total_parse)
   end
 end
 
@@ -149,7 +149,7 @@ function M.schedule_slow_repaint(bufnr)
   end
   buf_data.debouncers.slow_parse = vim.defer_fn(function ()
     M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.SLOW)
-  end, config.performance.debounce.slow_parse)
+  end, config.opts.performance.debounce.slow_parse)
 
 end
 
