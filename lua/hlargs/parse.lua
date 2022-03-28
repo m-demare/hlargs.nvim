@@ -41,28 +41,39 @@ function M.get_args(bufnr, func_node)
   return arg_nodes, arg_names_set
 end
 
-function M.get_body_node(bufnr, func_node)
+function M.get_body_nodes(bufnr, func_node)
   local filetype = util.get_filetype(bufnr)
   local query = queries.get_query(filetype, 'function_body')
 
   local start_row, _, end_row, _ = func_node:range()
+  local nodes = {}
+  local i=0
   for id, node in query:iter_captures(func_node, bufnr, start_row, end_row + 1) do
-    return node
+    if i==0 or util.get_first_function_parent(filetype, node) == func_node then
+      table.insert(nodes, node)
+      if not util.is_multi_body_lang(filetype) then
+        return nodes
+      end
+    end
+    i = i+1
   end
+  return nodes
 end
 
-function M.get_arg_usages(bufnr, body_node, arg_names_set, limits)
+function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
   local filetype = util.get_filetype(bufnr)
   local query = queries.get_query(filetype, 'variables')
 
-  local start_row, _, end_row, _ = body_node:range()
-  if limits then start_row, end_row = limits[1], limits[2]-1 end
-
   local usages_nodes = {}
-  for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do
-    local arg_name = ts_utils.get_node_text(node, bufnr)[1]
-    if arg_names_set[arg_name] and not util.ignore_node(filetype, node) then
-      table.insert(usages_nodes, node)
+  for _, body_node in ipairs(body_nodes) do
+    local start_row, _, end_row, _ = body_node:range()
+    if limits then start_row, end_row = limits[1], limits[2]-1 end
+
+    for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do
+      local arg_name = ts_utils.get_node_text(node, bufnr)[1]
+      if arg_names_set[arg_name] and not util.ignore_node(filetype, node) then
+        table.insert(usages_nodes, node)
+      end
     end
   end
   return usages_nodes
@@ -95,15 +106,15 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
     local arg_nodes, arg_names_set = M.get_args(bufnr, node)
     local usages_nodes = {}
     if config.opts.paint_arg_usages and #arg_nodes>0 then
-      local body_node = M.get_body_node(bufnr, node)
+      local body_nodes = M.get_body_nodes(bufnr, node)
       local limits = nil
       if mark then
         local from, to = util.get_marks_limits(bufnr, marks_ns, mark)
         limits = { from, to }
       end
-      if body_node then
+      if body_nodes and #body_nodes>0 then
         -- So that empty functions don't fail
-        usages_nodes = M.get_arg_usages(bufnr, body_node, arg_names_set, limits)
+        usages_nodes = M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
       end
     end
     coroutine.yield(arg_nodes, usages_nodes)

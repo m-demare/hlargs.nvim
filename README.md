@@ -82,6 +82,7 @@ Currently these languages are supported
 - lua
 - php
 - python
+- ruby
 - rust
 - tsx (react)
 - typescript
