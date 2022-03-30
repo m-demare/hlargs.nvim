@@ -79,6 +79,12 @@ function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
   return usages_nodes
 end
 
+local function not_excluded_name(bufnr, excluded_names)
+  return function (node)
+    return not vim.tbl_contains(excluded_names, ts_utils.get_node_text(node, bufnr)[1])
+  end
+end
+
 function M.get_nodes_to_paint(bufnr, marks_ns, mark)
   local filetype = util.get_filetype(bufnr)
   local query = queries.get_query(filetype, 'function_definition')
@@ -116,6 +122,12 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
         -- So that empty functions don't fail
         usages_nodes = M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
       end
+    end
+    if config.opts.excluded_argnames.declarations[filetype] then
+      arg_nodes = vim.tbl_filter(not_excluded_name(bufnr, config.opts.excluded_argnames.declarations[filetype]), arg_nodes)
+    end
+    if config.opts.excluded_argnames.usages[filetype] then
+      usages_nodes = vim.tbl_filter(not_excluded_name(bufnr, config.opts.excluded_argnames.usages[filetype]), usages_nodes)
     end
     coroutine.yield(arg_nodes, usages_nodes)
   end
