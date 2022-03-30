@@ -6,6 +6,13 @@ local defaults = {
   paint_arg_declarations = true,
   paint_arg_usages = true,
   hl_priority = 10000,
+  excluded_argnames = {
+    declarations = {},
+    usages = {
+      python = { 'self', 'cls' },
+      lua = { 'self' }
+    }
+  },
   performance = {
     parse_delay = 1,
     slow_parse_delay = 50,
