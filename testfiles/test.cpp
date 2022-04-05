@@ -3,10 +3,9 @@
 #include <algorithm>
 
 class MyClass {
-    int arg0;
+    int arg0_;
     float* arg1;
-    MyClass(int arg0, float* arg1){
-        this->arg0 = arg0;
+    MyClass(int arg0, float* arg1): arg0_(arg0){
         this->arg1 = arg1;
     }
 

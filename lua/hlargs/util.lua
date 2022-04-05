@@ -37,7 +37,7 @@ local function_types = {
   zig = { 'TopLevelDecl'}
 }
 
-local muli_body_langs = { 'ruby' }
+local muli_body_langs = { 'ruby', 'cpp' }
 
 function M.ignore_node(filetype, node)
   if ignored_field_names[filetype] and node:parent() then
