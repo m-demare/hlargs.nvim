@@ -76,7 +76,12 @@ require('hlargs').disable()
 require('hlargs').toggle()
 ```
 
-Note: If you want to change the color dynamically, you can do that using the highlight group `Hlargs`
+## Dynamically change color
+If you want to change the color dynamically, according to filetype or whatever, you can do that using the highlight group `Hlargs`
+Also, if your colorscheme highlights `TSParameter`, you can link `Hlargs` to `TSParameter`:
+```lua
+vim.cmd [[autocmd ColorScheme * highlight! link Hlargs TSParameter]]
+```
 
 ## Supported languages
 Currently these languages are supported
