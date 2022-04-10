@@ -9,8 +9,8 @@ class MyClass {
         this->arg1 = arg1;
     }
 
-    int fn(int arg2, char* arg3){
-        return arg2 + arg3[0];
+    int fn(char* arg2, int arg3 = 0){
+        return arg3 + arg2[0];
     }
 };
 
