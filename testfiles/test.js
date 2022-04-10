@@ -2,7 +2,7 @@ class C{
     constructor(props){
         super(props)
     }
-    memberFn(arg0){
+    memberFn(arg0, ...arg1){
         arg0.run()
     }
 }

@@ -1,6 +1,9 @@
 (formal_parameters
     (identifier) @argname)
 (formal_parameters
+    (rest_pattern
+      (identifier) @argname))
+(formal_parameters
     (array_pattern
       (identifier) @argname))
 (formal_parameters

@@ -2,7 +2,7 @@ class C extends Object{
     constructor(props: object){
         super(props)
     }
-    memberFn(arg0 : {run: ()=>void}){
+    memberFn(arg0 : {run: ()=>void}, ...arg1){
         arg0.run()
     }
 }
