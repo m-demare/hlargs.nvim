@@ -4,7 +4,6 @@ local config = require 'hlargs.config'
 local util = require 'hlargs.util'
 local bufdata = require 'hlargs.bufdata'
 local paint = require 'hlargs.paint'
-local queries = require 'vim.treesitter.query'
 
 local enabled = false
 
@@ -98,7 +97,7 @@ function M.add_range_to_queue(bufnr, from, to)
 
   -- `merge_ranges` won't be able to get the number under `max_concurrent_partial_parses` anyway,
   -- and creating this many extmarks would be pointless
-  if #buf_data.ranges_to_parse + #buf_data.tasks >= config.opts.performance.max_concurrent_partial_parses * 5 then
+  if #buf_data.ranges_to_parse + #buf_data.tasks >= config.opts.performance.max_concurrent_partial_parses * 3 then
     M.schedule_total_repaint(bufnr)
     return
   end
@@ -158,9 +157,8 @@ function M.buf_enter(bufnr)
   local buf_data = bufdata.get(bufnr)
   if not buf_data.initialized then
     buf_data.initialized = true
-    local filetype = util.get_filetype(bufnr)
-    local ok, query = pcall(queries.get_query, filetype, 'function_arguments')
-    buf_data.ignore = not ok or query == nil
+    local lang = util.get_lang(bufnr)
+    buf_data.ignore = not util.is_supported(lang)
     buf_data.filetype = vim.fn.getbufvar(bufnr, '&filetype')
     if not buf_data.ignore then
       M.schedule_total_repaint(bufnr, true)

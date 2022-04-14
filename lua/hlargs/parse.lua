@@ -8,12 +8,12 @@ local util = require 'hlargs.util'
 
 -- If arguments were modified, the whole function has to be reparsed
 local function fix_mark(bufnr, marks_ns, root_node, mark)
-  local filetype = util.get_filetype(bufnr)
-  local query = queries.get_query(filetype, 'function_arguments')
+  local lang = util.get_lang(bufnr)
+  local query = queries.get_query(lang, 'function_arguments')
   local orig_from, orig_to = util.get_marks_limits(bufnr, marks_ns, mark)
   local new_from, new_to = orig_from, orig_to
   for id, node in query:iter_captures(root_node, bufnr, orig_from, orig_to+1) do
-    local start_row, _, end_row, _ = util.get_first_function_parent(filetype, node):range()
+    local start_row, _, end_row, _ = util.get_first_function_parent(lang, node):range()
     if start_row < new_from then new_from = start_row end
     if end_row > new_to then new_to = end_row end
   end
@@ -25,13 +25,13 @@ local function fix_mark(bufnr, marks_ns, root_node, mark)
 end
 
 function M.get_args(bufnr, func_node)
-  local filetype = util.get_filetype(bufnr)
-  local query = queries.get_query(filetype, 'function_arguments')
+  local lang = util.get_lang(bufnr)
+  local query = queries.get_query(lang, 'function_arguments')
 
   local start_row, _, end_row, _ = func_node:range()
   local arg_names_set, arg_nodes = {}, {}
   for id, node in query:iter_captures(func_node, bufnr, start_row, end_row+1) do
-    if util.get_first_function_parent(filetype, node) == func_node then
+    if util.get_first_function_parent(lang, node) == func_node then
       table.insert(arg_nodes, node)
       local arg_name = ts_utils.get_node_text(node, bufnr)[1]
       arg_names_set[arg_name] = true
@@ -42,16 +42,16 @@ function M.get_args(bufnr, func_node)
 end
 
 function M.get_body_nodes(bufnr, func_node)
-  local filetype = util.get_filetype(bufnr)
-  local query = queries.get_query(filetype, 'function_body')
+  local lang = util.get_lang(bufnr)
+  local query = queries.get_query(lang, 'function_body')
 
   local start_row, _, end_row, _ = func_node:range()
   local nodes = {}
   local i=0
   for id, node in query:iter_captures(func_node, bufnr, start_row, end_row + 1) do
-    if i==0 or util.get_first_function_parent(filetype, node) == func_node then
+    if i==0 or util.get_first_function_parent(lang, node) == func_node then
       table.insert(nodes, node)
-      if not util.is_multi_body_lang(filetype) then
+      if not util.is_multi_body_lang(lang) then
         return nodes
       end
     end
@@ -61,17 +61,17 @@ function M.get_body_nodes(bufnr, func_node)
 end
 
 function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
-  local filetype = util.get_filetype(bufnr)
-  local query = queries.get_query(filetype, 'variables')
+  local lang = util.get_lang(bufnr)
+  local query = queries.get_query(lang, 'variables')
 
   local usages_nodes = {}
   for _, body_node in ipairs(body_nodes) do
     local start_row, _, end_row, _ = body_node:range()
-    if limits then start_row, end_row = limits[1], limits[2]-1 end
+    if limits then start_row, end_row = limits[1], limits[2] end
 
     for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do
       local arg_name = ts_utils.get_node_text(node, bufnr)[1]
-      if arg_names_set[arg_name] and not util.ignore_node(filetype, node) then
+      if arg_names_set[arg_name] and not util.ignore_node(lang, node) then
         table.insert(usages_nodes, node)
       end
     end
@@ -86,13 +86,13 @@ local function not_excluded_name(bufnr, excluded_names)
 end
 
 function M.get_nodes_to_paint(bufnr, marks_ns, mark)
-  local filetype = util.get_filetype(bufnr)
-  local query = queries.get_query(filetype, 'function_definition')
+  local lang = util.get_lang(bufnr)
+  local query = queries.get_query(lang, 'function_definition')
   if query == nil then
     return
   end
 
-  local parser = ts.get_parser(bufnr, filetype)
+  local parser = ts.get_parser(bufnr, lang)
   local syntax_tree = parser:parse()
   local root = syntax_tree[1]:root()
 
@@ -123,11 +123,11 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
         usages_nodes = M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
       end
     end
-    if config.opts.excluded_argnames.declarations[filetype] then
-      arg_nodes = vim.tbl_filter(not_excluded_name(bufnr, config.opts.excluded_argnames.declarations[filetype]), arg_nodes)
+    if config.opts.excluded_argnames.declarations[lang] then
+      arg_nodes = vim.tbl_filter(not_excluded_name(bufnr, config.opts.excluded_argnames.declarations[lang]), arg_nodes)
     end
-    if config.opts.excluded_argnames.usages[filetype] then
-      usages_nodes = vim.tbl_filter(not_excluded_name(bufnr, config.opts.excluded_argnames.usages[filetype]), usages_nodes)
+    if config.opts.excluded_argnames.usages[lang] then
+      usages_nodes = vim.tbl_filter(not_excluded_name(bufnr, config.opts.excluded_argnames.usages[lang]), usages_nodes)
     end
     coroutine.yield(arg_nodes, usages_nodes)
   end

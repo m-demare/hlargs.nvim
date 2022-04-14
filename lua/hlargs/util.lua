@@ -125,9 +125,13 @@ function M.merge_ranges(bufnr, marks_ns, ranges)
   return merged_ranges
 end
 
-function M.get_filetype(bufnr)
+function M.get_lang(bufnr)
     local filetype = vim.fn.getbufvar(bufnr, '&filetype')
     return parsers.ft_to_lang(filetype)
+end
+
+function M.is_supported(lang)
+    return function_types[lang] ~= nil
 end
 
 function M.i(...)
