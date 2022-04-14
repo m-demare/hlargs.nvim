@@ -70,7 +70,7 @@ function M.end_task(bufnr, task)
   local limits = nil
   if task.mark then
     local from, to = util.get_marks_limits(bufnr, buf_data.marks_ns, task.mark)
-    limits = { from, to }
+    limits = { from, to+1 }
   end
 
   for _, t in ipairs(buf_data.tasks) do
