@@ -99,6 +99,11 @@ function M.end_task(bufnr, task)
       table.remove(buf_data.tasks, i)
     end
   end
+  if #buf_data.tasks == 0 then
+    -- Reset change_idx so that it doesn't grow too much
+    -- (Especially for people who never close nvim)
+    buf_data.change_idx = 0
+  end
 end
 
 function M.stop_older_contained(bufnr, task)

@@ -3,6 +3,7 @@ class C{
         super(props)
     }
     memberFn(arg0, ...arg1){
+        let arg0 = 123
         arg0.run()
     }
 }
