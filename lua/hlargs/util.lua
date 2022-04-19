@@ -146,7 +146,7 @@ function M.i(...)
 end
 
 function M.print_node_text(node, bufnr)
-  local text = ts_utils.get_node_text(node, bufnr)
+  local text = vim.treesitter.query.get_node_text(node, bufnr)
   for line = 1, #text do
     print(text[line])
   end

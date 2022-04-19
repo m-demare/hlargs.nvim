@@ -33,7 +33,7 @@ function M.get_args(bufnr, func_node)
   for id, node in query:iter_captures(func_node, bufnr, start_row, end_row+1) do
     if util.get_first_function_parent(lang, node) == func_node then
       table.insert(arg_nodes, node)
-      local arg_name = ts_utils.get_node_text(node, bufnr)[1]
+      local arg_name = vim.treesitter.query.get_node_text(node, bufnr)
       arg_names_set[arg_name] = true
     end
   end
@@ -70,7 +70,7 @@ function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
     if limits then start_row, end_row = limits[1], limits[2] end
 
     for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do
-      local arg_name = ts_utils.get_node_text(node, bufnr)[1]
+      local arg_name = vim.treesitter.query.get_node_text(node, bufnr)
       if arg_names_set[arg_name] and not util.ignore_node(lang, node) then
         table.insert(usages_nodes, node)
       end
@@ -81,7 +81,7 @@ end
 
 local function not_excluded_name(bufnr, excluded_names)
   return function (node)
-    return not vim.tbl_contains(excluded_names, ts_utils.get_node_text(node, bufnr)[1])
+    return not vim.tbl_contains(excluded_names, vim.treesitter.query.get_node_text(node, bufnr))
   end
 end
 

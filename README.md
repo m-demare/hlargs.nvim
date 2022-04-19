@@ -11,8 +11,9 @@ Highlight arguments' definitions and usages, asynchronously, using Treesitter
 
 
 ## Installation
-This plugin is for [neovim](https://neovim.io/) only (tested on 0.6.1, no idea whether it works on
-previous versions or not)
+This plugin is for [neovim](https://neovim.io/) only. Version 0.7+ is recommended. If
+you are using 0.6, use the branch `0.6-compat` and an appropriate nvim-treesitter
+version (installation instructions in the README of that branch).
 
 [packer.nvim](https://github.com/wbthomason/packer.nvim):
 ```lua
