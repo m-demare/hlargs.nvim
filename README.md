@@ -109,7 +109,7 @@ Note that you have to install each language's parser using `:TSInstall {lang}`
 ### Request new language
 Please include a sample file with your request, that covers most of the edge cases that specific
 language allows for (nested functions, lambda functions, member functions, parameter destructuring,
-optional parameters, rest paratemeters, variable redefinition, etc). See
+optional parameters, rest paratemeters, etc). See
 [examples](https://github.com/m-demare/hlargs.nvim/tree/main/testfiles).
 
 Also do note that I can't support a language that doesn't have a Treesitter parser implemented.
