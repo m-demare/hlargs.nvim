@@ -13,19 +13,22 @@ Highlight arguments' definitions and usages, asynchronously, using Treesitter
 ## Installation
 This plugin is for [neovim](https://neovim.io/) only (tested on 0.6.1, no idea whether it works on
 previous versions or not)
+Branch `0.6-compat` will need to use an older nvim-treesitter version too, I tried
+with commit `7fffab173c8dd2b0c549efbfb89e1b9dd9e98709` and it worked fine
 
 [packer.nvim](https://github.com/wbthomason/packer.nvim):
 ```lua
 use {
   'm-demare/hlargs.nvim',
-  requires = { 'nvim-treesitter/nvim-treesitter' }
+  branch = '0.6-compat'
+  requires = { 'nvim-treesitter/nvim-treesitter', commit = '7fffab173c8dd2b0c549efbfb89e1b9dd9e98709' }
 }
 ```
 
 [vim-plug](https://github.com/junegunn/vim-plug):
 ```vim
-Plug 'nvim-treesitter/nvim-treesitter'
-Plug 'm-demare/hlargs.nvim'
+Plug 'nvim-treesitter/nvim-treesitter', { 'commit': '7fffab173c8dd2b0c549efbfb89e1b9dd9e98709' }
+Plug 'm-demare/hlargs.nvim', { 'branch': '0.6-compat' }
 ```
 
 ## Usage
