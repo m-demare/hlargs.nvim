@@ -1,6 +1,6 @@
 local M = {}
 
-local ts_utils = vim.treesitter.query
+local ts = vim.treesitter
 local parsers = require 'nvim-treesitter.parsers'
 
 local ignored_field_names = {
@@ -146,7 +146,7 @@ function M.i(...)
 end
 
 function M.print_node_text(node, bufnr)
-  local text = ts_utils.get_node_text(node, bufnr)
+  local text = ts.get_node_text(node, bufnr)
   for line = 1, #text do
     print(text[line])
   end

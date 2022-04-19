@@ -1,16 +1,14 @@
 local M = {}
 
 local ts = vim.treesitter
-local ts_utils = vim.treesitter.query
 local ts_locals = require 'nvim-treesitter.locals'
-local queries = vim.treesitter.query
 local config = require 'hlargs.config'
 local util = require 'hlargs.util'
 
 -- If arguments were modified, the whole function has to be reparsed
 local function fix_mark(bufnr, marks_ns, root_node, mark)
   local lang = util.get_lang(bufnr)
-  local query = queries.get_query(lang, 'function_arguments')
+  local query = ts.get_query(lang, 'function_arguments')
   local orig_from, orig_to = util.get_marks_limits(bufnr, marks_ns, mark)
   local new_from, new_to = orig_from, orig_to
   for id, node in query:iter_captures(root_node, bufnr, orig_from, orig_to+1) do
@@ -27,14 +25,14 @@ end
 
 function M.get_args(bufnr, func_node)
   local lang = util.get_lang(bufnr)
-  local query = queries.get_query(lang, 'function_arguments')
+  local query = ts.get_query(lang, 'function_arguments')
 
   local start_row, _, end_row, _ = func_node:range()
   local arg_names_set, arg_nodes = {}, {}
   for id, node in query:iter_captures(func_node, bufnr, start_row, end_row+1) do
     if util.get_first_function_parent(lang, node) == func_node then
       table.insert(arg_nodes, node)
-      local arg_name = ts_utils.get_node_text(node, bufnr)[1]
+      local arg_name = ts.get_node_text(node, bufnr)[1]
       arg_names_set[arg_name] = node
     end
   end
@@ -44,7 +42,7 @@ end
 
 function M.get_body_nodes(bufnr, func_node)
   local lang = util.get_lang(bufnr)
-  local query = queries.get_query(lang, 'function_body')
+  local query = ts.get_query(lang, 'function_body')
 
   local start_row, _, end_row, _ = func_node:range()
   local nodes = {}
@@ -63,7 +61,7 @@ end
 
 function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
   local lang = util.get_lang(bufnr)
-  local query = queries.get_query(lang, 'variables')
+  local query = ts.get_query(lang, 'variables')
 
   local usages_nodes = {}
   for _, body_node in ipairs(body_nodes) do
@@ -71,7 +69,7 @@ function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
     if limits then start_row, end_row = limits[1], limits[2] end
 
     for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do
-      local arg_name = ts_utils.get_node_text(node, bufnr)[1]
+      local arg_name = ts.get_node_text(node, bufnr)[1]
       if arg_names_set[arg_name] and not util.ignore_node(lang, node) then
         local def_node, _, kind = ts_locals.find_definition(node, bufnr)
         if kind == nil or def_node == arg_names_set[arg_name] then
@@ -85,13 +83,13 @@ end
 
 local function not_excluded_name(bufnr, excluded_names)
   return function (node)
-    return not vim.tbl_contains(excluded_names, ts_utils.get_node_text(node, bufnr)[1])
+    return not vim.tbl_contains(excluded_names, ts.get_node_text(node, bufnr)[1])
   end
 end
 
 function M.get_nodes_to_paint(bufnr, marks_ns, mark)
   local lang = util.get_lang(bufnr)
-  local query = queries.get_query(lang, 'function_definition')
+  local query = ts.get_query(lang, 'function_definition')
   if query == nil then
     return
   end
