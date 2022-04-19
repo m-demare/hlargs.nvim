@@ -1,9 +1,9 @@
 local M = {}
 
 local ts = vim.treesitter
-local ts_utils = vim.treesitter.query
+local ts_utils = require 'nvim-treesitter.ts_utils'
 local ts_locals = require 'nvim-treesitter.locals'
-local queries = require 'vim.treesitter.query'
+local queries = vim.treesitter.query
 local config = require 'hlargs.config'
 local util = require 'hlargs.util'
 
