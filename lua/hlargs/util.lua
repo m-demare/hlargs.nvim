@@ -1,6 +1,6 @@
 local M = {}
 
-local ts_utils = require 'nvim-treesitter.ts_utils'
+local ts_utils = vim.treesitter.query
 local parsers = require 'nvim-treesitter.parsers'
 
 local ignored_field_names = {
