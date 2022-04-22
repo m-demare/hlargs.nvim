@@ -27,12 +27,9 @@ local defaults = {
   }
 }
 
-local hl_group = "Hlargs"
-
 function M.setup(opts)
   M.opts = vim.tbl_deep_extend("force", {}, defaults, opts or {})
-  vim.cmd("highlight clear " .. hl_group)
-  vim.cmd("highlight! def " .. hl_group .. " guifg=" .. M.opts.color)
+  vim.cmd("highlight def Hlargs guifg=" .. M.opts.color)
 end
 
 M.setup()
