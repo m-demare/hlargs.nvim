@@ -3,6 +3,9 @@ local M = {}
 local defaults = {
   color = "#ef9062",
   excluded_filetypes = {},
+  disable = function(lang, bufnr)
+    return vim.tbl_contains(M.opts.excluded_filetypes, lang)
+  end,
   paint_arg_declarations = true,
   paint_arg_usages = true,
   hl_priority = 10000,

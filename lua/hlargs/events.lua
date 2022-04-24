@@ -49,15 +49,13 @@ local function find_and_paint_iteration(bufnr, task, co)
 end
 
 local function is_excluded(bufnr)
-  -- For excluded_filetypes, I use actual filetypes instead
-  -- of ft_to_lang, it makes more sense
-  local filetype = vim.fn.getbufvar(bufnr, '&filetype')
-  return vim.tbl_contains(config.opts.excluded_filetypes, filetype)
+  local lang = util.get_lang(bufnr)
+  return config.opts.disable(lang, bufnr)
 end
 
 function M.find_and_paint_nodes(bufnr, task_type, mark)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
-  if not enabled or is_excluded(bufnr) then return end
+  if not enabled then return end
 
   local task = bufdata.new_task(bufnr, task_type, mark)
   if not task then return end
@@ -91,7 +89,7 @@ local function schedule_partial_repaints(bufnr, buf_data)
 end
 
 function M.add_range_to_queue(bufnr, from, to)
-  if not enabled or is_excluded(bufnr) then return end
+  if not enabled then return end
 
   local buf_data = bufdata.get(bufnr)
 
@@ -119,7 +117,7 @@ function M.add_range_to_queue(bufnr, from, to)
 end
 
 function M.schedule_total_repaint(bufnr, ignore_debounce)
-  if not enabled or is_excluded(bufnr) then return end
+  if not enabled then return end
   if bufdata.total_parse_is_running(bufnr) then
     -- Don't want to run multiple total repaints simultaneously
     M.schedule_slow_repaint(bufnr)
@@ -140,7 +138,7 @@ function M.schedule_total_repaint(bufnr, ignore_debounce)
 end
 
 function M.schedule_slow_repaint(bufnr)
-  if not enabled or is_excluded(bufnr) then return end
+  if not enabled then return end
 
   local buf_data = bufdata.get(bufnr)
   if buf_data.debouncers.slow_parse then
