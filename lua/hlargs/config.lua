@@ -32,7 +32,5 @@ function M.setup(opts)
   vim.cmd("highlight def Hlargs guifg=" .. M.opts.color)
 end
 
-M.setup()
-
 return M
 
