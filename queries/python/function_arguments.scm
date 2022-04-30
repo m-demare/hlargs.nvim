@@ -7,9 +7,7 @@
       (dictionary_splat_pattern
         (identifier) @argname)
       (default_parameter
-        [
-          (identifier) @argname
-        ])
+        (identifier) @argname)
       (typed_parameter
         [
           (identifier) @argname
@@ -19,9 +17,7 @@
             (identifier) @argname)
         ])
       (typed_default_parameter
-        [
-          (identifier) @argname
-        ])
+        (identifier) @argname)
     ]))
 (lambda
   parameters: (lambda_parameters

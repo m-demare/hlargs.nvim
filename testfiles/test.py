@@ -44,5 +44,6 @@ def fn_typed_splat_dict(arg10: int, **arg11: dict[int, str]) -> None:
 def fn_default_values(arg12="foo", arg13: int = 1) -> None:
     if arg12 == "foo":
         Class(arg12, arg13)
+        Class(arg1=arg12, arg2=arg13)
     else:
-        Class(arg12, lambda arg14=0: arg14 + arg13)
+        Class(arg12, arg2=lambda arg14=0: arg14 + arg13)
