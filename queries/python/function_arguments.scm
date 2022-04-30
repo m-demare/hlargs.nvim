@@ -28,7 +28,5 @@
       (dictionary_splat_pattern
         (identifier) @argname)
       (default_parameter
-        [
-          (identifier) @argname
-        ])
+        (identifier) @argname)
     ]))
