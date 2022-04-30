@@ -1,15 +1,13 @@
 local M = {}
 
 local ts = vim.treesitter
-local ts_utils = require 'nvim-treesitter.ts_utils'
-local queries = require 'vim.treesitter.query'
 local config = require 'hlargs.config'
 local util = require 'hlargs.util'
 
 -- If arguments were modified, the whole function has to be reparsed
 local function fix_mark(bufnr, marks_ns, root_node, mark)
   local lang = util.get_lang(bufnr)
-  local query = queries.get_query(lang, 'function_arguments')
+  local query = ts.query.get_query(lang, 'function_arguments')
   local orig_from, orig_to = util.get_marks_limits(bufnr, marks_ns, mark)
   local new_from, new_to = orig_from, orig_to
   for id, node in query:iter_captures(root_node, bufnr, orig_from, orig_to+1) do
@@ -26,7 +24,7 @@ end
 
 function M.get_args(bufnr, func_node)
   local lang = util.get_lang(bufnr)
-  local query = queries.get_query(lang, 'function_arguments')
+  local query = ts.query.get_query(lang, 'function_arguments')
 
   local start_row, _, end_row, _ = func_node:range()
   local arg_names_set, arg_nodes = {}, {}
@@ -43,7 +41,7 @@ end
 
 function M.get_body_nodes(bufnr, func_node)
   local lang = util.get_lang(bufnr)
-  local query = queries.get_query(lang, 'function_body')
+  local query = ts.query.get_query(lang, 'function_body')
 
   local start_row, _, end_row, _ = func_node:range()
   local nodes = {}
@@ -62,7 +60,7 @@ end
 
 function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
   local lang = util.get_lang(bufnr)
-  local query = queries.get_query(lang, 'variables')
+  local query = ts.query.get_query(lang, 'variables')
 
   local usages_nodes = {}
   for _, body_node in ipairs(body_nodes) do
@@ -87,7 +85,7 @@ end
 
 function M.get_nodes_to_paint(bufnr, marks_ns, mark)
   local lang = util.get_lang(bufnr)
-  local query = queries.get_query(lang, 'function_definition')
+  local query = ts.query.get_query(lang, 'function_definition')
   if query == nil then
     return
   end

@@ -1,6 +1,5 @@
 local M = {}
 
-local ts_utils = require 'nvim-treesitter.ts_utils'
 local parsers = require 'nvim-treesitter.parsers'
 
 local ignored_field_names = {
@@ -132,17 +131,6 @@ end
 
 function M.is_supported(lang)
     return function_types[lang] ~= nil
-end
-
-function M.i(...)
-  local objects = {}
-  for i = 1, select('#', ...) do
-    local v = select(i, ...)
-    table.insert(objects, vim.inspect(v))
-  end
-
-  print(table.concat(objects, '\n'))
-  return ...
 end
 
 function M.print_node_text(node, bufnr)

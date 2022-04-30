@@ -146,7 +146,7 @@ function M.delete_data(bufnr)
 end
 
 function M.debug()
-  util.i(data)
+  vim.pretty_print(data)
 end
 
 return M
