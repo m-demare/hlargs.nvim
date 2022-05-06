@@ -96,28 +96,15 @@ function M.merge_ranges(bufnr, marks_ns, ranges)
       table.insert(merged_ranges, next)
       last_added = next
     else
-      local delete_next = true
       if next_end > last_end then
-        -- For some reason, this call might fail with `end_row value outside range`,
-        -- even though end_row literally comes from another extmark (and acording to
-        -- logs, it is within range)
-        -- Strict=false might fix this (https://github.com/neovim/neovim/pull/17001)
-        -- I couldn't reproduce this consistently
-        local ok, _ = pcall(vim.api.nvim_buf_set_extmark, bufnr, marks_ns, last_start, 0, {
+        vim.api.nvim_buf_set_extmark(bufnr, marks_ns, last_start, 0, {
           id = last_added,
-          -- end_row = math.min(next_end, vim.api.nvim_buf_line_count(bufnr)),
           end_row = next_end,
-          end_col = 0
+          end_col = 0,
+          strict = false
         })
-        delete_next = ok
-        if not delete_next then
-          table.insert(merged_ranges, next)
-          last_added = next
-        end
       end
-      if delete_next then
-        vim.api.nvim_buf_del_extmark(bufnr, marks_ns, next)
-      end
+      vim.api.nvim_buf_del_extmark(bufnr, marks_ns, next)
     end
   end
 

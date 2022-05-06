@@ -150,7 +150,8 @@ function M.schedule_slow_repaint(bufnr)
 
 end
 
-function M.buf_enter(bufnr)
+function M.buf_enter(data)
+  local bufnr = data.buf
   if is_excluded(bufnr) then return end
   local buf_data = bufdata.get(bufnr)
   if not buf_data.initialized then
@@ -174,32 +175,32 @@ function M.buf_enter(bufnr)
   })
 end
 
-function M.filetype(bufnr, ft)
+function M.filetype(data)
+  local bufnr = data.buf
+  local ft = data.match
   local buf_data = bufdata.get(bufnr)
   if buf_data.initialized and buf_data.filetype ~= ft then
-    M.buf_delete(bufnr)
-    M.buf_enter(bufnr)
+    M.buf_delete(data)
+    M.buf_enter(data)
   end
 end
 
-function M.buf_delete(bufnr)
+function M.buf_delete(data)
+  local bufnr = data.buf
   bufdata.delete_data(bufnr)
 end
 
 function M.enable()
   if not enabled then
     enabled = true
-    vim.cmd([[
-      augroup Hlargs
-        autocmd!
-        autocmd BufEnter * lua require('hlargs.events').buf_enter(tonumber(vim.fn.expand("<abuf>")))
-        autocmd FileType * lua require('hlargs.events').filetype(tonumber(vim.fn.expand("<abuf>")), vim.fn.expand("<amatch>"))
-        autocmd BufDelete * lua require('hlargs.events').buf_delete(tonumber(vim.fn.expand("<abuf>")))
-      augroup end]])
+    local augroup = vim.api.nvim_create_augroup('Hlargs', { clear = true })
+    vim.api.nvim_create_autocmd('BufEnter', { callback = M.buf_enter, group = augroup })
+    vim.api.nvim_create_autocmd('FileType', { callback = M.filetype, group = augroup })
+    vim.api.nvim_create_autocmd('BufDelete', { callback = M.buf_delete, group = augroup })
     local bufs = vim.api.nvim_list_bufs()
     for _, b in ipairs(bufs) do
       if vim.api.nvim_buf_is_loaded(b) then
-        M.buf_enter(b)
+        M.buf_enter({buf = b})
       end
     end
   end
