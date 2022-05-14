@@ -18,7 +18,8 @@ function M.get(bufnr)
     ranges_to_parse = {},
     main_ns = vim.api.nvim_create_namespace(''),
     marks_ns = vim.api.nvim_create_namespace(''),
-    initialized = false
+    initialized = false,
+    ts_cb_attached = false
   }
   return data[bufnr]
 end

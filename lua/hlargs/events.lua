@@ -14,6 +14,14 @@ local function paint_nodes(bufnr, ns, node_group)
   end
 end
 
+local function ts_on_change(bufnr)
+  return function(changes)
+    for _, change in ipairs(changes) do
+      M.add_range_to_queue(bufnr, change[1], change[3])
+    end
+  end
+end
+
 local function find_and_paint_iteration(bufnr, task, co)
   local delay = config.opts.performance.parse_delay
   if task.type == bufdata.TaskTypes.SLOW then
@@ -21,8 +29,14 @@ local function find_and_paint_iteration(bufnr, task, co)
   end
   vim.defer_fn(function()
     if coroutine.status(co) ~= "dead" and not task.stop then
-      local marks_ns = bufdata.get(bufnr).marks_ns
-      local running, arg_nodes, usage_nodes = coroutine.resume(co, bufnr, marks_ns, task.mark)
+      local buf_data = bufdata.get(bufnr)
+      local marks_ns = buf_data.marks_ns
+      local ts_cb
+      if not buf_data.ts_cb_attached then
+        ts_cb = ts_on_change(bufnr)
+        buf_data.ts_cb_attached = true
+      end
+      local running, arg_nodes, usage_nodes = coroutine.resume(co, bufnr, marks_ns, task.mark, ts_cb)
       if task.mark then
         -- Mainly to prevent tasks from insert mode from accumulating
         -- Can't do this on new_task because the tasks' marks

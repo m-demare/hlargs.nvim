@@ -83,7 +83,7 @@ local function not_excluded_name(bufnr, excluded_names)
   end
 end
 
-function M.get_nodes_to_paint(bufnr, marks_ns, mark)
+function M.get_nodes_to_paint(bufnr, marks_ns, mark, on_changedtree)
   local lang = util.get_lang(bufnr)
   local query = ts.query.get_query(lang, 'function_definition')
   if query == nil then
@@ -93,6 +93,11 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
   local parser = ts.get_parser(bufnr, lang)
   local syntax_tree = parser:parse()
   local root = syntax_tree[1]:root()
+  if on_changedtree then
+    parser:register_cbs {
+      on_changedtree = on_changedtree
+    }
+  end
 
   local start_row, _, end_row, _ = root:range()
   if mark then
