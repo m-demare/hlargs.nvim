@@ -39,7 +39,8 @@ require('hlargs').setup()
 To change them
 ```lua
 require('hlargs').setup {
-  color = "#ef9062",
+  color = '#ef9062',
+  highlight = {},
   excluded_filetypes = {},
   disable = function(lang, bufnr) -- If changed, `excluded_filetypes` will be ignored
     return vim.tbl_contains(opts.excluded_filetypes, lang)
@@ -82,10 +83,6 @@ require('hlargs').toggle()
 
 ## Dynamically change color
 If you want to change the color dynamically, according to filetype or whatever, you can do that using the highlight group `Hlargs`
-Also, if your colorscheme highlights `TSParameter`, you can link `Hlargs` to `TSParameter`:
-```lua
-vim.cmd [[autocmd ColorScheme * highlight! link Hlargs TSParameter]]
-```
 
 ## Supported languages
 Currently these languages are supported
