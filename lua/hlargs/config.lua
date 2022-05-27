@@ -1,7 +1,8 @@
 local M = {}
 
 local defaults = {
-  color = "#ef9062",
+  color = '#ef9062',
+  highlight = {},
   excluded_filetypes = {},
   disable = function(lang, bufnr)
     return vim.tbl_contains(M.opts.excluded_filetypes, lang)
@@ -32,7 +33,12 @@ local defaults = {
 
 function M.setup(opts)
   M.opts = vim.tbl_deep_extend("force", {}, defaults, opts or {})
-  vim.cmd("highlight def Hlargs guifg=" .. M.opts.color)
+  if vim.tbl_isempty(M.opts.highlight) then
+    vim.api.nvim_set_hl(0, 'Hlargs', { fg = M.opts.color, default = true })
+  else
+    M.opts.highlight.default = true
+    vim.api.nvim_set_hl(0, 'Hlargs', M.opts.highlight)
+  end
 end
 
 return M
