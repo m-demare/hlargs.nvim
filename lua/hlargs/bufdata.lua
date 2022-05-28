@@ -3,6 +3,7 @@ local util = require 'hlargs.util'
 local paint = require 'hlargs.paint'
 
 local data = {}
+local main_ns = vim.api.nvim_create_namespace('hlargs_main')
 
 M.TaskTypes = {
   PARTIAL = 1,
@@ -16,7 +17,6 @@ function M.get(bufnr)
     tasks = {},
     debouncers = {},
     ranges_to_parse = {},
-    main_ns = vim.api.nvim_create_namespace('hlargs_main_' .. tostring(bufnr)),
     marks_ns = vim.api.nvim_create_namespace(''),
     initialized = false,
     ts_cb_attached = false
@@ -82,14 +82,9 @@ function M.end_task(bufnr, task)
   end
 
   -- Merge changes to main
-  if limits then
-    paint.clear(bufnr, buf_data.main_ns, limits)
-    paint.combine_nss(bufnr, buf_data.main_ns, task.ns, limits)
-    paint.clear(bufnr, task.ns)
-  else
-    paint.clear(bufnr, buf_data.main_ns)
-    buf_data.main_ns = task.ns
-  end
+  paint.clear(bufnr, main_ns, limits)
+  paint.combine_nss(bufnr, main_ns, task.ns, limits)
+  paint.clear(bufnr, task.ns)
 
   if task.mark then
     vim.api.nvim_buf_del_extmark(bufnr, buf_data.marks_ns, task.mark)
@@ -141,7 +136,7 @@ function M.delete_data(bufnr)
     end
   end
   if vim.api.nvim_buf_is_valid(bufnr) then
-    paint.clear(bufnr, data[bufnr].main_ns)
+    paint.clear(bufnr, main_ns)
   end
   data[bufnr] = nil
 end
