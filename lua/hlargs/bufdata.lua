@@ -16,7 +16,7 @@ function M.get(bufnr)
     tasks = {},
     debouncers = {},
     ranges_to_parse = {},
-    main_ns = vim.api.nvim_create_namespace(''),
+    main_ns = vim.api.nvim_create_namespace('hlargs_main_' .. tostring(bufnr)),
     marks_ns = vim.api.nvim_create_namespace(''),
     initialized = false,
     ts_cb_attached = false
