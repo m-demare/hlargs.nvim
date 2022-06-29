@@ -28,13 +28,9 @@ function M.set_extmark(bufnr, ns, start_row, start_col, end_row, end_col, hl_gro
   return mark_id
 end
 
-function get_hl_group(bufnr, ns, limits, start_row, start_col, end_row, end_col, idx)
+function get_hl_group(bufnr, ns, start_row, start_col, end_row, end_col, idx)
   if not config.opts.use_colorpalette then
     return hl_group
-  end
-  local from, to = 0, -1
-  if not limits then
-    limits = { from, to }
   end
   if NS_ARG_COLOR[ns] == nil then
     NS_ARG_COLOR[ns] = {}
@@ -58,7 +54,7 @@ function M.combine_nss(bufnr, dst, src, limits)
   local ok, extmarks = pcall(vim.api.nvim_buf_get_extmarks, bufnr, src, from, to, { details = true })
   for idx, extmark in ipairs(extmarks) do
     local start_row, start_col, end_row, end_col = extmark[2], extmark[3], extmark[4].end_row, extmark[4].end_col
-    local hl_group = get_hl_group(bufnr, dst, limits, start_row, start_col, end_row, end_col, idx)
+    local hl_group = get_hl_group(bufnr, dst, start_row, start_col, end_row, end_col, idx)
     M.set_extmark(bufnr, dst, start_row, start_col, end_row, end_col, hl_group, config.opts.hl_priority)
   end
 end
