@@ -42,6 +42,7 @@ function M.setup(opts)
     vim.api.nvim_set_hl(0, 'Hlargs', M.opts.highlight)
   end
   if M.opts.use_colorpalette then
+    table.insert(M.opts.colorpalette, 1, M.opts.color)
     for i, color in pairs(M.opts.colorpalette) do
        vim.api.nvim_set_hl(0, 'Hlarg' .. i, {fg = color, default=true})
     end
