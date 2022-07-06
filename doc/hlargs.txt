@@ -23,6 +23,11 @@ table with the settings you want to override. The defaults are the following:
 >
     require('hlargs').setup {
       color = '#ef9062',
+      use_colorpalette = false,
+      colorpalette = {"#F5FA1D", "#F97C65", "#35D27F", "#EB75D6", "#E5D180", 
+      "#8997F5", "#D49DA5", "#7FEC35", "#F6B223", "#B4F1C3", 
+      "#99B730", "#F67C1B", "#3AC6BE", "#EAAFF1", "#DE9A4E", "#BBEA87", 
+      "#EEF06D", "#8FB272"},
       highlight = {},
       excluded_filetypes = {},
       disable = function(lang, bufnr) -- If changed, `excluded_filetypes` will be ignored
@@ -69,6 +74,25 @@ color                                                    *hlargs-config-color*
     `highlight` will be used).
     Type: `string`
     Default: '#ef9062'
+
+use_colorpalette                              *hlargs-config-use_colorpalette*
+    Description: If you want multiple colors for arguments. There will be 
+    used `colorpalette` by index of argument.
+    Type: `bool`
+    Default: `false`
+
+colorpalette                                     *hlargs-config-colorpalette*
+    Description: Hex colors to be applied to arguments. If 
+    `use_colorpalette` is `true` it will be used. There will be added 
+    `Hlarg{idx}` highlight group `Hlarg{idx}` where `{idx}` is index of 
+    `colorpalette`.
+    Type: `string[]`
+    Default: 
+
+    {"#F5FA1D", "#F97C65", "#35D27F", "#EB75D6", "#E5D180", 
+    "#8997F5", "#D49DA5", "#7FEC35", "#F6B223", "#B4F1C3", "#99B730", 
+    "#F67C1B", "#3AC6BE", "#EAAFF1", "#DE9A4E", "#BBEA87", 
+    "#EEF06D", "#8FB272"}
 
 highlight                                            *hlargs-config-highlight*
     Description: Highlights to be applied to arguments, see |nvim_set_hl|.
