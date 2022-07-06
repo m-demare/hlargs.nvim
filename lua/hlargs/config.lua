@@ -2,7 +2,7 @@ local M = {}
 
 local defaults = {
   color = '#ef9062',
-  use_colorpalette = true,
+  use_colorpalette = false,
   colorpalette = {"#F5FA1D", "#F97C65", "#35D27F", "#EB75D6", "#E5D180", "#8997F5", "#D49DA5", "#7FEC35", "#F6B223", "#B4F1C3", "#99B730", "#F67C1B", "#3AC6BE", "#EAAFF1", "#DE9A4E", "#BBEA87", "#EEF06D", "#8FB272"},
   highlight = {},
   excluded_filetypes = {},
