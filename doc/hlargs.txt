@@ -23,6 +23,23 @@ table with the settings you want to override. The defaults are the following:
 >
     require('hlargs').setup {
       color = '#ef9062',
+      use_colorpalette = false,
+      colorpalette = {
+        { fg = "#ef9062" },
+        { fg = "#3AC6BE" },
+        { fg = "#35D27F" },
+        { fg = "#EB75D6" },
+        { fg = "#E5D180" },
+        { fg = "#8997F5" },
+        { fg = "#D49DA5" },
+        { fg = "#7FEC35" },
+        { fg = "#F6B223" },
+        { fg = "#F67C1B" },
+        { fg = "#DE9A4E" },
+        { fg = "#BBEA87" },
+        { fg = "#EEF06D" },
+        { fg = "#8FB272" },
+      },
       highlight = {},
       excluded_filetypes = {},
       disable = function(lang, bufnr) -- If changed, `excluded_filetypes` will be ignored
@@ -69,6 +86,35 @@ color                                                    *hlargs-config-color*
     `highlight` will be used).
     Type: `string`
     Default: '#ef9062'
+
+use_colorpalette                              *hlargs-config-use_colorpalette*
+    Description: If you want multiple colors for arguments..
+    Type: `bool`
+    Default: `false`
+
+colorpalette                                     *hlargs-config-colorpalette*
+    Description: Hex colors to be applied to arguments. If 
+    `use_colorpalette` is `true` it will be used. There will be added 
+    `Hlarg{idx}` highlight group `Hlarg{idx}` where `{idx}` is index of 
+    `colorpalette` and `idx` calculate by polynomial rolling hash function
+    Type: `table[]`
+    Default: 
+    {
+        { fg = "#ef9062" },
+        { fg = "#3AC6BE" },
+        { fg = "#35D27F" },
+        { fg = "#EB75D6" },
+        { fg = "#E5D180" },
+        { fg = "#8997F5" },
+        { fg = "#D49DA5" },
+        { fg = "#7FEC35" },
+        { fg = "#F6B223" },
+        { fg = "#F67C1B" },
+        { fg = "#DE9A4E" },
+        { fg = "#BBEA87" },
+        { fg = "#EEF06D" },
+        { fg = "#8FB272" },
+      }
 
 highlight                                            *hlargs-config-highlight*
     Description: Highlights to be applied to arguments, see |nvim_set_hl|.

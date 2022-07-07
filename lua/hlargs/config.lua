@@ -1,7 +1,24 @@
 local M = {}
 
 local defaults = {
-  color = '#ef9062',
+  color = "#ef9062",
+  use_colorpalette = false,
+  colorpalette = {
+    { fg = "#ef9062" },
+    { fg = "#3AC6BE" },
+    { fg = "#35D27F" },
+    { fg = "#EB75D6" },
+    { fg = "#E5D180" },
+    { fg = "#8997F5" },
+    { fg = "#D49DA5" },
+    { fg = "#7FEC35" },
+    { fg = "#F6B223" },
+    { fg = "#F67C1B" },
+    { fg = "#DE9A4E" },
+    { fg = "#BBEA87" },
+    { fg = "#EEF06D" },
+    { fg = "#8FB272" },
+  },
   highlight = {},
   excluded_filetypes = {},
   disable = function(lang, bufnr)
@@ -13,9 +30,9 @@ local defaults = {
   excluded_argnames = {
     declarations = {},
     usages = {
-      python = { 'self', 'cls' },
-      lua = { 'self' }
-    }
+      python = { "self", "cls" },
+      lua = { "self" },
+    },
   },
   performance = {
     parse_delay = 1,
@@ -26,20 +43,27 @@ local defaults = {
       partial_parse = 3,
       partial_insert_mode = 100,
       total_parse = 700,
-      slow_parse = 5000
-    }
-  }
+      slow_parse = 5000,
+    },
+  },
 }
 
 function M.setup(opts)
   M.opts = vim.tbl_deep_extend("force", {}, defaults, opts or {})
-  if vim.tbl_isempty(M.opts.highlight) then
-    vim.api.nvim_set_hl(0, 'Hlargs', { fg = M.opts.color, default = true })
+
+  if M.opts.use_colorpalette then
+    for i, color in pairs(M.opts.colorpalette) do
+      color.default = true
+      vim.api.nvim_set_hl(0, "Hlarg" .. i, color)
+    end
   else
-    M.opts.highlight.default = true
-    vim.api.nvim_set_hl(0, 'Hlargs', M.opts.highlight)
+    if vim.tbl_isempty(M.opts.highlight) then
+      vim.api.nvim_set_hl(0, "Hlargs", { fg = M.opts.color, default = true })
+    else
+      M.opts.highlight.default = true
+      vim.api.nvim_set_hl(0, "Hlargs", M.opts.highlight)
+    end
   end
 end
 
 return M
-
