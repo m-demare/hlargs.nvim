@@ -3,17 +3,12 @@ local config = require("hlargs.config")
 local colorpalette = require("hlargs.colorpalette")
 local hl_group = "Hlargs"
 
-local NS_ARG_COLOR = {}
-
 -- Clears a namespace within limits
 -- (or in the entire buffer if limits is nil)
 function M.clear(bufnr, ns, limits)
   local from, to = 0, -1
   if limits then
     from, to = limits[1], limits[2]
-  end
-  if NS_ARG_COLOR[ns] ~= nil then
-    NS_ARG_COLOR[ns] = nil
   end
   vim.api.nvim_buf_clear_namespace(bufnr, ns, from, to)
 end
@@ -32,17 +27,9 @@ function get_hl_group(bufnr, ns, start_row, start_col, end_row, end_col, idx)
   if not config.opts.use_colorpalette then
     return hl_group
   end
-  if NS_ARG_COLOR[ns] == nil then
-    NS_ARG_COLOR[ns] = {}
-  end
   local arg_name = vim.api.nvim_buf_get_text(bufnr, start_row, start_col, end_row, end_col, {})
   arg_name = arg_name[1]
-
-  if NS_ARG_COLOR[ns][arg_name] == nil then
-    local color = colorpalette.get_color(idx)
-    NS_ARG_COLOR[ns][arg_name] = color
-  end
-  return NS_ARG_COLOR[ns][arg_name].hl_group
+  return colorpalette.get_hlgroup(arg_name)
 end
 
 function M.combine_nss(bufnr, dst, src, limits)
