@@ -114,8 +114,12 @@ function M.add_range_to_queue(bufnr, from, to)
     return
   end
 
-  local range = paint.set_extmark(bufnr, buf_data.marks_ns, from, 0, to, 0)
-  table.insert(buf_data.ranges_to_parse, range)
+  local ok, range = paint.set_extmark(bufnr, buf_data.marks_ns, from, 0, to, 0)
+  if ok then
+    -- If it failed for some reason, the slow_parse
+    -- will have to take care of it
+    table.insert(buf_data.ranges_to_parse, range)
+  end
 
   if buf_data.debouncers.range_queue then
     vim.loop.timer_stop(buf_data.debouncers.range_queue)
@@ -226,7 +230,7 @@ function M.disable()
     pcall(vim.cmd, "autocmd! Hlargs")
     pcall(vim.cmd, "augroup! Hlargs")
 
-    for bufnr, data in pairs(bufdata.get_all()) do
+    for bufnr, _ in pairs(bufdata.get_all()) do
       bufdata.delete_data(bufnr)
     end
   end
