@@ -76,6 +76,9 @@ end
 -- Merges overlapping (or non overlapping, but
 -- separated by up to a line) ranges in a list
 function M.merge_ranges(bufnr, marks_ns, ranges)
+  ranges = vim.tbl_filter(function (r)
+    return r ~= nil;
+  end, ranges)
   if #ranges == 0 then return ranges end
 
   -- Sort by ranges' start position

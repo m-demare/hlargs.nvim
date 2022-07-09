@@ -20,10 +20,10 @@ function M.set_extmark(bufnr, ns, start_row, start_col, end_row, end_col, hl_gro
     hl_group = hl_group,
     priority = priority,
   })
-  return mark_id
+  return ok, mark_id
 end
 
-function get_hl_group(bufnr, ns, start_row, start_col, end_row, end_col, idx)
+local function get_hl_group(bufnr, ns, start_row, start_col, end_row, end_col, idx)
   if not config.opts.use_colorpalette then
     return hl_group
   end
