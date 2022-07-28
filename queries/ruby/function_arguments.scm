@@ -5,6 +5,10 @@
     (identifier) @argname)
   (keyword_parameter
     (identifier) @argname)
+  (block_parameter
+    (identifier) @argname)
+  (destructured_parameter
+    (identifier) @argname)
   ])
 (lambda_parameters
   [
@@ -13,6 +17,10 @@
     (identifier) @argname)
   (keyword_parameter
     (identifier) @argname)
+  (block_parameter
+    (identifier) @argname)
+  (destructured_parameter
+    (identifier) @argname)
   ])
 (block_parameters
   [
@@ -20,6 +28,10 @@
   (optional_parameter
     (identifier) @argname)
   (keyword_parameter
+    (identifier) @argname)
+  (block_parameter
+    (identifier) @argname)
+  (destructured_parameter
     (identifier) @argname)
   ])
 
