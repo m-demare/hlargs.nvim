@@ -68,9 +68,12 @@ function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
     if limits then start_row, end_row = limits[1], limits[2] end
 
     for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do
-      local arg_name = vim.treesitter.query.get_node_text(node, bufnr)
-      if arg_names_set[arg_name] and not util.ignore_node(lang, node) then
-        table.insert(usages_nodes, node)
+      local name = query.captures[id]
+      if name ~= 'ignore' then
+        local arg_name = vim.treesitter.query.get_node_text(node, bufnr)
+        if arg_names_set[arg_name] and not util.ignore_node(lang, node) then
+          table.insert(usages_nodes, node)
+        end
       end
     end
   end

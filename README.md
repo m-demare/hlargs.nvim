@@ -95,6 +95,7 @@ Currently these languages are supported
 - lua
 - php
 - python
+- r
 - ruby
 - rust
 - tsx (react)

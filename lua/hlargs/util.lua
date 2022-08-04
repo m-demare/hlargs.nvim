@@ -28,6 +28,7 @@ local function_types = {
   lua = { 'function_declaration', 'function_definition' },
   php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function' },
   python = { 'function_definition', 'lambda' },
+  r = { 'function_definition', 'lambda_function' },
   ruby = { 'method', 'lambda', 'block', 'do_block' },
   rust = { 'function_item' },
   tsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
