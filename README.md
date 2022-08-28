@@ -36,7 +36,10 @@ If you are ok with the default settings:
 require('hlargs').setup()
 ```
 
-To change them
+You should call this **after** you set your colorscheme, otherwise it might get
+overriden.
+
+To change the settings:
 ```lua
 require('hlargs').setup {
   color = '#ef9062',

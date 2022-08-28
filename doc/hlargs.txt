@@ -17,6 +17,9 @@ be enabled by default, it can be enabled, disabled or toggled as follows:
     require('hlargs').toggle()
 <
 
+`setup` should be called after setting your colorscheme, otherwise it might
+get overriden.
+
 Calling setup with no arguments will use the default settings. You can pass a
 table with the settings you want to override. The defaults are the following:
 
@@ -93,12 +96,12 @@ use_colorpalette                              *hlargs-config-use_colorpalette*
     Default: `false`
 
 colorpalette                                     *hlargs-config-colorpalette*
-    Description: Hex colors to be applied to arguments. If 
-    `use_colorpalette` is `true` it will be used. There will be added 
-    `Hlarg{idx}` highlight group `Hlarg{idx}` where `{idx}` is index of 
+    Description: Hex colors to be applied to arguments. If
+    `use_colorpalette` is `true` it will be used. There will be added
+    `Hlarg{idx}` highlight group `Hlarg{idx}` where `{idx}` is index of
     `colorpalette` and `idx` calculate by polynomial rolling hash function
     Type: `table[]`
-    Default: 
+    Default:
     {
         { fg = "#ef9062" },
         { fg = "#3AC6BE" },
