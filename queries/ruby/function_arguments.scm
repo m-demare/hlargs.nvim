@@ -34,4 +34,7 @@
   (destructured_parameter
     (identifier) @argname)
   ])
+(rescue
+  variable: (exception_variable
+    (identifier) @catch))
 

@@ -50,6 +50,10 @@ table with the settings you want to override. The defaults are the following:
       end,
       paint_arg_declarations = true,
       paint_arg_usages = true,
+      paint_catch_blocks = {
+          declarations = false,
+          usages = false
+      },
       hl_priority = 10000,
       excluded_argnames = {
         declarations = {},
@@ -150,6 +154,18 @@ paint_arg_usages                              *hlargs-config-paint_arg_usages*
     Description: Whether argument usages should be colored or not
     Type: `bool`
     Default: `true`
+
+paint_catch_blocks                          *hlargs-config-paint_catch_blocks*
+    Description: Whether catch block arguments (exceptions) should be
+    colored or not.
+    Type: `table`
+    Default:
+>
+    {
+        declarations = false,
+        usages = false
+    }
+<
 
 hl_priority                                        *hlargs-config-hl_priority*
     Description: Priority for highlighting

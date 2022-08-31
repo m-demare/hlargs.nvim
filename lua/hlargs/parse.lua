@@ -29,10 +29,13 @@ function M.get_args(bufnr, func_node)
   local start_row, _, end_row, _ = func_node:range()
   local arg_names_set, arg_nodes = {}, {}
   for id, node in query:iter_captures(func_node, bufnr, start_row, end_row+1) do
+    local capture_name = query.captures[id]
     if util.get_first_function_parent(lang, node) == func_node then
-      table.insert(arg_nodes, node)
+      if capture_name ~= 'catch' or config.opts.paint_catch_blocks.declarations then
+        table.insert(arg_nodes, node)
+      end
       local arg_name = vim.treesitter.query.get_node_text(node, bufnr)
-      arg_names_set[arg_name] = true
+      arg_names_set[arg_name] = capture_name
     end
   end
 
@@ -68,10 +71,11 @@ function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
     if limits then start_row, end_row = limits[1], limits[2] end
 
     for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do
-      local name = query.captures[id]
-      if name ~= 'ignore' then
+      local capture_name = query.captures[id]
+      if capture_name ~= 'ignore' then
         local arg_name = vim.treesitter.query.get_node_text(node, bufnr)
-        if arg_names_set[arg_name] and not util.ignore_node(lang, node) then
+        if arg_names_set[arg_name] and not util.ignore_node(lang, node)
+          and (arg_names_set[arg_name] ~= 'catch' or config.opts.paint_catch_blocks.usages)then
           table.insert(usages_nodes, node)
         end
       end

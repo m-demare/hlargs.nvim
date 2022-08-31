@@ -18,21 +18,21 @@ local ignored_field_names = {
   }
 }
 
-local function_types = {
+local function_or_catch_nodes = {
   c = { 'function_definition' },
-  cpp = { 'function_definition', 'lambda_expression' },
+  cpp = { 'function_definition', 'lambda_expression', 'catch_clause' },
   go = { 'function_declaration', 'method_declaration', 'func_literal' },
-  java = { 'method_declaration', 'lambda_expression' },
-  javascript = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
-  jsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
+  java = { 'method_declaration', 'lambda_expression', 'catch_clause'},
+  javascript = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause' },
+  jsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause' },
   lua = { 'function_declaration', 'function_definition' },
-  php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function' },
-  python = { 'function_definition', 'lambda' },
+  php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function', 'catch_clause' },
+  python = { 'function_definition', 'lambda', 'except_clause' },
   r = { 'function_definition', 'lambda_function' },
-  ruby = { 'method', 'lambda', 'block', 'do_block' },
+  ruby = { 'method', 'lambda', 'block', 'do_block', 'rescue' },
   rust = { 'function_item' },
-  tsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
-  typescript = { 'function_declaration', 'method_definition', 'function', 'arrow_function' },
+  tsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause'  },
+  typescript = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause'  },
   vim = { 'function_definition', 'lambda_expression' },
   zig = { 'TopLevelDecl'}
 }
@@ -57,7 +57,7 @@ function M.ignore_node(filetype, node)
 end
 
 function M.get_first_function_parent(filetype, node)
-  while node and not vim.tbl_contains(function_types[filetype], node:type()) do
+  while node and not vim.tbl_contains(function_or_catch_nodes[filetype], node:type()) do
     node = node:parent()
   end
   return node
@@ -121,7 +121,7 @@ function M.get_lang(bufnr)
 end
 
 function M.is_supported(lang)
-    return function_types[lang] ~= nil
+    return function_or_catch_nodes[lang] ~= nil
 end
 
 function M.print_node_text(node, bufnr)

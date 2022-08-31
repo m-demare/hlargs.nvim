@@ -10,7 +10,11 @@ function fn1($arg0) {
 
 class C{
     function memberFn($arg0){
-        $arg0->run();
+        try {
+            $arg0->run();
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 }
 

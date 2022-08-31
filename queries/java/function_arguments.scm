@@ -6,4 +6,7 @@
   parameters: (formal_parameters
     (formal_parameter
       (identifier) @argname)))
+(catch_clause
+  (catch_formal_parameter
+    name: (identifier) @catch))
 

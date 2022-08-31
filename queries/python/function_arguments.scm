@@ -30,3 +30,8 @@
       (default_parameter
         (identifier) @argname)
     ]))
+(except_clause
+  (as_pattern
+    (as_pattern_target
+      (identifier) @catch)))
+

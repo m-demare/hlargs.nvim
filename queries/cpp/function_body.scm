@@ -4,4 +4,6 @@
   (field_initializer_list) @body)
 (lambda_expression
   body: (compound_statement) @body)
+(catch_clause
+  body: (_) @body)
 

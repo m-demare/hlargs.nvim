@@ -50,6 +50,10 @@ require('hlargs').setup {
   end,
   paint_arg_declarations = true,
   paint_arg_usages = true,
+  paint_catch_blocks = {
+    declarations = false,
+    usages = false
+  },
   hl_priority = 10000,
   excluded_argnames = {
     declarations = {},
