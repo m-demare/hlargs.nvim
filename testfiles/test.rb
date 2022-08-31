@@ -36,3 +36,10 @@ students.each do |(student, grade)|
   p student
   p grade
 end
+
+begin
+  raise ArgumentError.new("Some error")
+rescue ArgumentError => e
+  puts e.message
+end
+

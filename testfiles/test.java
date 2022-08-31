@@ -9,8 +9,12 @@ public class Class {
 
     public static void main(String []args) {
         List<String> strs = Arrays.asList(args);
-        strs.sort((String str1, String str2) -> str1.compareTo(str2));
-        System.out.println(strs);
+        try {
+            strs.sort((String str1, String str2) -> str1.compareTo(str2));
+            System.out.println(strs);
+        } catch (Exception e) {
+            System.err.println(e);
+        }
     }
 }
 

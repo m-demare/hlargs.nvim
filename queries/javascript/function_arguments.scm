@@ -18,4 +18,6 @@
     left: (identifier) @definition.parameter))
 (arrow_function
   . parameter: (identifier) @argname)
+(catch_clause
+  . parameter: (identifier) @catch)
 

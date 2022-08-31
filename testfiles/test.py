@@ -4,6 +4,10 @@ class Class:
         self.arg2 = arg2
 
         def function2(arg3):  # inner function
+            try:
+                arg3()
+            except Exception as e:
+                raise e
             return arg2
 
 

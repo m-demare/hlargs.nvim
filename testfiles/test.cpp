@@ -31,10 +31,14 @@ int main(int argc, char* argv[]){
     struct mystr a;
     a.argc = 0;
 
-    sort(vec.begin(), vec.end(), [argc](const int & a, const int & b) -> bool { 
-        int c = b - argc;
-        return a > c;
-    });
+    try {
+        sort(vec.begin(), vec.end(), [argc](const int & a, const int & b) -> bool {
+            int c = b - argc;
+            return a > c;
+        });
+    } catch (const std::exception& e) {
+        std::cout << e.what();
+    }
 
     return 0;
 }

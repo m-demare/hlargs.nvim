@@ -16,4 +16,6 @@
         value: (identifier) @argname))))
 (arrow_function
   . parameter: (identifier) @argname)
+(catch_clause
+  . parameter: (identifier) @catch)
 

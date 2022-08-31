@@ -10,4 +10,6 @@
 (do_block
   parameters: (block_parameters)
   (_)+ @body)
+(rescue
+  body: (_) @body)
 
