@@ -17,9 +17,6 @@ be enabled by default, it can be enabled, disabled or toggled as follows:
     require('hlargs').toggle()
 <
 
-`setup` should be called after setting your colorscheme, otherwise it might
-get overriden.
-
 Calling setup with no arguments will use the default settings. You can pass a
 table with the settings you want to override. The defaults are the following:
 

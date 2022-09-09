@@ -55,19 +55,30 @@ local defaults = {
 function M.setup(opts)
   M.opts = vim.tbl_deep_extend("force", {}, defaults, opts or {})
 
-  if M.opts.use_colorpalette then
-    for i, color in pairs(M.opts.colorpalette) do
-      color.default = true
-      vim.api.nvim_set_hl(0, "Hlarg" .. i, color)
-    end
-  else
-    if vim.tbl_isempty(M.opts.highlight) then
-      vim.api.nvim_set_hl(0, "Hlargs", { fg = M.opts.color, default = true })
+  local function create_hl_groups()
+    if M.opts.use_colorpalette then
+      for i, color in pairs(M.opts.colorpalette) do
+        color.default = true
+        vim.api.nvim_set_hl(0, "Hlarg" .. i, color)
+      end
     else
-      M.opts.highlight.default = true
-      vim.api.nvim_set_hl(0, "Hlargs", M.opts.highlight)
+      if vim.tbl_isempty(M.opts.highlight) then
+        vim.api.nvim_set_hl(0, "Hlargs", { fg = M.opts.color, default = true })
+      else
+        M.opts.highlight.default = true
+        vim.api.nvim_set_hl(0, "Hlargs", M.opts.highlight)
+      end
     end
   end
+
+  create_hl_groups()
+
+  local augroup = vim.api.nvim_create_augroup('hlargs-create-hlgroups', { clear = true })
+  vim.api.nvim_create_autocmd('ColorScheme', {
+    callback = create_hl_groups,
+    group = augroup
+  })
+
 end
 
 return M
