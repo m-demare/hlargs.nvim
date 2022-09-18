@@ -25,6 +25,7 @@ local function_or_catch_nodes = {
   java = { 'method_declaration', 'lambda_expression', 'catch_clause'},
   javascript = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause' },
   jsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause' },
+  julia = { 'function_definition', 'function_expression', 'do_clause', 'assignment_expression' },
   lua = { 'function_declaration', 'function_definition' },
   php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function', 'catch_clause' },
   python = { 'function_definition', 'lambda', 'except_clause' },
@@ -37,7 +38,7 @@ local function_or_catch_nodes = {
   zig = { 'TopLevelDecl'}
 }
 
-local muli_body_langs = { 'ruby', 'cpp' }
+local multi_body_langs = { 'ruby', 'cpp', 'julia' }
 
 function M.ignore_node(filetype, node)
   if ignored_field_names[filetype] and node:parent() then
@@ -66,7 +67,7 @@ end
 -- Some languages (ejem, Ruby) don't have a single body node,
 -- but instead everything after the parameters is body
 function M.is_multi_body_lang(lang)
-  return vim.tbl_contains(muli_body_langs, lang)
+  return vim.tbl_contains(multi_body_langs, lang)
 end
 
 function M.get_marks_limits(bufnr, marks_ns, extmark)

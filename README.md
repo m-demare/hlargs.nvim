@@ -96,6 +96,7 @@ Currently these languages are supported
 - java
 - javascript
 - jsx (react)
+- julia
 - lua
 - php
 - python
