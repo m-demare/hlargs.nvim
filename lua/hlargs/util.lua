@@ -18,14 +18,27 @@ local ignored_field_names = {
   }
 }
 
-local function_or_catch_nodes = {
+local function julia_is_function_node(node)
+  local node_type = node:type()
+  if vim.tbl_contains({ 'function_definition', 'function_expression', 'do_clause' }, node_type) then
+    return true
+  end
+  if node_type == 'assignment_expression' then
+    if node:child(0):type() == 'call_expression' then
+      return true
+    end
+  end
+  return false
+end
+
+local function_or_catch_node_validators = {
   c = { 'function_definition' },
   cpp = { 'function_definition', 'lambda_expression', 'catch_clause' },
   go = { 'function_declaration', 'method_declaration', 'func_literal' },
   java = { 'method_declaration', 'lambda_expression', 'catch_clause'},
   javascript = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause' },
   jsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause' },
-  julia = { 'function_definition', 'function_expression', 'do_clause', 'assignment_expression' },
+  julia = julia_is_function_node,
   lua = { 'function_declaration', 'function_definition' },
   php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function', 'catch_clause' },
   python = { 'function_definition', 'lambda', 'except_clause' },
@@ -57,8 +70,18 @@ function M.ignore_node(filetype, node)
   return false
 end
 
+local function is_function_or_catch_node(filetype, node)
+  local validator = function_or_catch_node_validators[filetype]
+  if type(validator) == "table" then
+    return vim.tbl_contains(validator, node:type())
+  elseif type(validator) == "function" then
+    return validator(node)
+  end
+  return false
+end
+
 function M.get_first_function_parent(filetype, node)
-  while node and not vim.tbl_contains(function_or_catch_nodes[filetype], node:type()) do
+  while node and not is_function_or_catch_node(filetype, node) do
     node = node:parent()
   end
   return node
@@ -122,7 +145,7 @@ function M.get_lang(bufnr)
 end
 
 function M.is_supported(lang)
-    return function_or_catch_nodes[lang] ~= nil
+    return function_or_catch_node_validators[lang] ~= nil
 end
 
 function M.print_node_text(node, bufnr)

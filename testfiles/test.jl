@@ -69,3 +69,11 @@ end
 
 slurp(x...) = print(x)
 
+function standard(x)
+  print(x)
+  x += 11
+  x /= 11
+  x *= 11
+  x -= 11
+end
+
