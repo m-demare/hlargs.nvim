@@ -2,7 +2,7 @@
 def fn(arg0, arg1='asd', arg2: 123, &blk)
     puts arg0
 end
-fn "Function: hlargs is great"
+fn("Function: hlargs is great", arg2: 321)
 
 # Method
 class Example

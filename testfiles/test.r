@@ -17,6 +17,8 @@ fn6 <- function(arg1, arg2 = 5) {
   return(abs(arg1) + abs(arg2))
 }
 
+fn6(5, arg2 = 8)
+
 fn7 <- function(arg1, arg2 = 5) {
   subfn <- function(subarg1) {
     arg1 + subarg1

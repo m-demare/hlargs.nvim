@@ -193,6 +193,23 @@ CUSTOMIZATION                                               *hlargs-customize*
 If you want to change the color dynamically, according to filetype or whatever,
 you can do that using the highlight group `Hlargs`
 
+
+==============================================================================
+EXTRA HIGHLIGHTING                                             *hlargs-extras*
+
+This plugin can also highlight some extra things.
+
+Exception highlighting has been explained in |hlargs-config-paint_catch_blocks|
+
+You can also highlight named parameters in languages that support them (PHP,
+python, R, ruby). For that, you need to add the following nvim-treesitter
+configuration, after your nvim-treesitter.configs.setup call:
+>
+    require("nvim-treesitter.highlight").set_custom_captures {
+        ["hlargs.namedparam"] = "Hlargs",
+    }
+<
+
 ==============================================================================
 PERFORMANCE                                               *hlargs-performance*
 
