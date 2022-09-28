@@ -1,3 +1,5 @@
+;; extends
+
 (
  (keyword_argument
    name: (identifier) @hlargs.namedparam)
