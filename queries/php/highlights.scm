@@ -1,6 +1,5 @@
 ;; extends
 
-((argument
-  name: (name) @hlargs.namedparam)
- (set! "priority" 105))
+(argument
+  name: (name) @HlargsNamedParams)
 
