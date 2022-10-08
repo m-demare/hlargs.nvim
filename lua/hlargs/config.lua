@@ -30,6 +30,9 @@ local defaults = {
     declarations = false,
     usages = false
   },
+  extras = {
+    named_parameters = false,
+  },
   hl_priority = 10000,
   excluded_argnames = {
     declarations = {},
@@ -68,6 +71,10 @@ function M.setup(opts)
         M.opts.highlight.default = true
         vim.api.nvim_set_hl(0, "Hlargs", M.opts.highlight)
       end
+    end
+
+    if M.opts.extras.named_parameters then
+      vim.cmd([[hi link @HlargsNamedParams Hlargs]])
     end
   end
 
