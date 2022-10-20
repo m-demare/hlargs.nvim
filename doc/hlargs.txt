@@ -167,7 +167,7 @@ paint_catch_blocks                          *hlargs-config-paint_catch_blocks*
     }
 <
 
-paint_catch_blocks                          *hlargs-config-paint_catch_blocks*
+extras                                                  *hlargs-config-extras*
     Description: Extra syntactic highlighting (handled by |treesitter-highlight|)
     Type: `table`
     Default:
