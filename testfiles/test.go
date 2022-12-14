@@ -11,7 +11,10 @@ func (s *str) method() string {
 }
 
 func f1(arg1 string, asd ...int) {
-    s := str{arg1: arg1}
+    s := str{
+        arg1: arg1,
+        asd: asd,
+    }
     s.arg1 = "arg1"
 }
 
