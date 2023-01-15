@@ -106,6 +106,7 @@ Currently these languages are supported
 - r
 - ruby
 - rust
+- scala 3
 - tsx (react)
 - typescript
 - vim

@@ -45,6 +45,7 @@ local function_or_catch_node_validators = {
   r = { 'function_definition', 'lambda_function' },
   ruby = { 'method', 'lambda', 'block', 'do_block', 'rescue' },
   rust = { 'function_item' },
+  scala = { 'function_declaration', 'function_definition' },
   tsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause'  },
   typescript = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause'  },
   vim = { 'function_definition', 'lambda_expression' },
