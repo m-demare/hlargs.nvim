@@ -3,6 +3,9 @@ local M = {}
 local parsers = require 'nvim-treesitter.parsers'
 
 local ignored_field_names = {
+  c_sharp = {
+    member_access_expression = { 'name' }
+  },
   python = {
     _ = { 'attribute', 'name' }
   },
@@ -34,6 +37,7 @@ end
 local function_or_catch_node_validators = {
   c = { 'function_definition' },
   cpp = { 'function_definition', 'lambda_expression', 'catch_clause' },
+  c_sharp = { 'constructor_declaration', 'method_declaration', 'lambda_expression' },
   go = { 'function_declaration', 'method_declaration', 'func_literal' },
   java = { 'method_declaration', 'lambda_expression', 'catch_clause'},
   javascript = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause' },

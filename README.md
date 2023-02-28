@@ -95,6 +95,7 @@ If you want to change the color dynamically, according to filetype or whatever, 
 Currently these languages are supported
 - c
 - cpp
+- c_sharp (C#)
 - go
 - java
 - javascript

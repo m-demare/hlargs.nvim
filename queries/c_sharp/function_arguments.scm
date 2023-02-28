@@ -1,0 +1,3 @@
+(parameter
+  name: (identifier) @argname)
+
