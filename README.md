@@ -102,6 +102,7 @@ Currently these languages are supported
 - jsx (react)
 - julia
 - lua
+- nix
 - php
 - python
 - r

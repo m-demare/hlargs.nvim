@@ -13,6 +13,9 @@ local ignored_field_names = {
     dot_index_expression = { 'field' },
     field = { 'name' }
   },
+  nix = {
+    attrpath = { 'attr' }
+  },
   java = {
     _ = { 'field' }
   },
@@ -44,6 +47,7 @@ local function_or_catch_node_validators = {
   jsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause' },
   julia = julia_is_function_node,
   lua = { 'function_declaration', 'function_definition' },
+  nix = { 'function_expression' },
   php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function', 'catch_clause' },
   python = { 'function_definition', 'lambda', 'except_clause' },
   r = { 'function_definition', 'lambda_function' },
