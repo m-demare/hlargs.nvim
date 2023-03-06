@@ -4,6 +4,9 @@ local config = require 'hlargs.config'
 local util = require 'hlargs.util'
 local bufdata = require 'hlargs.bufdata'
 local paint = require 'hlargs.paint'
+local async = require 'hlargs.async'
+local attach = async.attach
+local defer = async.defer
 
 local enabled = false
 
@@ -122,14 +125,14 @@ function M.add_range_to_queue(bufnr, from, to)
   end
 
   if buf_data.debouncers.range_queue then
-    vim.loop.timer_stop(buf_data.debouncers.range_queue)
+    buf_data.debouncers.range_queue()
   end
   local debounce_time = config.opts.performance.debounce.partial_parse
   if string.sub(vim.api.nvim_get_mode().mode, 1, 1) == 'i' then
     -- Higher debouncing for insert mode
     debounce_time = config.opts.performance.debounce.partial_insert_mode
   end
-  buf_data.debouncers.range_queue = vim.defer_fn(function ()
+  buf_data.debouncers.range_queue = defer(function ()
     schedule_partial_repaints(bufnr, buf_data)
   end, debounce_time)
 end
@@ -144,12 +147,12 @@ function M.schedule_total_repaint(bufnr, ignore_debounce)
 
   local buf_data = bufdata.get(bufnr)
   if buf_data.debouncers.total_parse then
-    vim.loop.timer_stop(buf_data.debouncers.total_parse)
+    buf_data.debouncers.total_parse()
   end
   if ignore_debounce then
     M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.TOTAL)
   else
-    buf_data.debouncers.total_parse = vim.defer_fn(function ()
+    buf_data.debouncers.total_parse = defer(function ()
       M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.TOTAL)
     end, config.opts.performance.debounce.total_parse)
   end
@@ -160,9 +163,9 @@ function M.schedule_slow_repaint(bufnr)
 
   local buf_data = bufdata.get(bufnr)
   if buf_data.debouncers.slow_parse then
-    vim.loop.timer_stop(buf_data.debouncers.slow_parse)
+    buf_data.debouncers.slow_parse()
   end
-  buf_data.debouncers.slow_parse = vim.defer_fn(function ()
+  buf_data.debouncers.slow_parse = defer(function ()
     M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.SLOW)
   end, config.opts.performance.debounce.slow_parse)
 
@@ -183,7 +186,7 @@ function M.buf_enter(data)
   end
   if buf_data.ignore then return end
 
-  vim.api.nvim_buf_attach(bufnr, false, {
+  buf_data.detach = attach(bufnr, {
     on_lines = function(ev, bufnr, _, from, old_to, to)
       M.add_range_to_queue(bufnr, from, to)
     end,

@@ -30,6 +30,7 @@ end
 
 function M.new_task(bufnr, type, mark)
   local buf_data = M.get(bufnr)
+  if buf_data.ignore then error('Attempting to create task of type ' .. tostring(type) .. ' in invalid buffer') end
   buf_data.change_idx = buf_data.change_idx + 1
 
   local task = {
@@ -123,6 +124,18 @@ function M.stop_older_contained(bufnr, task)
   end
 end
 
+local function clean_debouncers(buf_data)
+  if buf_data.debouncers.range_queue then
+    buf_data.debouncers.range_queue()
+  end
+  if buf_data.debouncers.total_parse then
+    buf_data.debouncers.total_parse()
+  end
+  if buf_data.debouncers.slow_parse then
+    buf_data.debouncers.slow_parse()
+  end
+end
+
 -- Gets called on disable / BufDelete
 function M.delete_data(bufnr)
   if data[bufnr] == nil then return end
@@ -137,6 +150,10 @@ function M.delete_data(bufnr)
   end
   if vim.api.nvim_buf_is_valid(bufnr) then
     paint.clear(bufnr, main_ns)
+  end
+  clean_debouncers(data[bufnr])
+  if data[bufnr].detach then
+    data[bufnr].detach()
   end
   data[bufnr] = nil
 end
