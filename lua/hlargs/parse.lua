@@ -3,11 +3,17 @@ local M = {}
 local ts = vim.treesitter
 local config = require 'hlargs.config'
 local util = require 'hlargs.util'
+local has = vim.fn.has
 
 -- If arguments were modified, the whole function has to be reparsed
 local function fix_mark(bufnr, marks_ns, root_node, mark)
   local lang = util.get_lang(bufnr)
-  local query = ts.query.get_query(lang, 'function_arguments')
+  local query
+  if has('nvim-0.9') == 1 then
+    query = ts.query.get(lang, 'function_arguments')
+  else
+    query = ts.query.get_query(lang, 'function_arguments')
+  end
   local orig_from, orig_to = util.get_marks_limits(bufnr, marks_ns, mark)
   local new_from, new_to = orig_from, orig_to
   for id, node in query:iter_captures(root_node, bufnr, orig_from, orig_to+1) do
@@ -24,7 +30,12 @@ end
 
 function M.get_args(bufnr, func_node)
   local lang = util.get_lang(bufnr)
-  local query = ts.query.get_query(lang, 'function_arguments')
+  local query
+  if has('nvim-0.9') == 1 then
+    query= ts.query.get(lang, 'function_arguments')
+  else
+    query= ts.query.get_query(lang, 'function_arguments')
+  end
 
   local start_row, _, end_row, _ = func_node:range()
   local arg_names_set, arg_nodes = {}, {}
@@ -34,7 +45,12 @@ function M.get_args(bufnr, func_node)
       if capture_name ~= 'catch' or config.opts.paint_catch_blocks.declarations then
         table.insert(arg_nodes, node)
       end
-      local arg_name = vim.treesitter.query.get_node_text(node, bufnr)
+      local arg_name
+      if has('nvim-0.9') == 1 then
+        arg_name = vim.treesitter.get_node_text(node, bufnr)
+      else
+        arg_name = vim.treesitter.query.get_node_text(node, bufnr)
+      end
       arg_names_set[arg_name] = capture_name
     end
   end
@@ -44,7 +60,12 @@ end
 
 function M.get_body_nodes(bufnr, func_node)
   local lang = util.get_lang(bufnr)
-  local query = ts.query.get_query(lang, 'function_body')
+  local query
+  if has('nvim-0.9') == 1 then
+    query= ts.query.get(lang, 'function_body')
+  else
+    query= ts.query.get_query(lang, 'function_body')
+  end
 
   local start_row, _, end_row, _ = func_node:range()
   local nodes = {}
@@ -63,7 +84,12 @@ end
 
 function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
   local lang = util.get_lang(bufnr)
-  local query = ts.query.get_query(lang, 'variables')
+  local query
+  if has('nvim-0.9') == 1 then
+    query = ts.query.get(lang, 'variables')
+  else
+    query = ts.query.get_query(lang, 'variables')
+  end
 
   local usages_nodes = {}
   for _, body_node in ipairs(body_nodes) do
@@ -73,7 +99,12 @@ function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
     for id, node in query:iter_captures(body_node, bufnr, start_row, end_row+1) do
       local capture_name = query.captures[id]
       if capture_name ~= 'ignore' then
-        local arg_name = vim.treesitter.query.get_node_text(node, bufnr)
+        local arg_name
+        if has('nvim-0.9') == 1 then
+          arg_name = vim.treesitter.get_node_text(node, bufnr)
+        else
+          arg_name = vim.treesitter.query.get_node_text(node, bufnr)
+        end
         if arg_names_set[arg_name] and not util.ignore_node(lang, node)
           and (arg_names_set[arg_name] ~= 'catch' or config.opts.paint_catch_blocks.usages)then
           table.insert(usages_nodes, node)
@@ -86,13 +117,22 @@ end
 
 local function not_excluded_name(bufnr, excluded_names)
   return function (node)
-    return not vim.tbl_contains(excluded_names, vim.treesitter.query.get_node_text(node, bufnr))
+    if has('nvim-0.9') == 1 then
+      return not vim.tbl_contains(excluded_names, vim.treesitter.get_node_text(node, bufnr))
+    else
+      return not vim.tbl_contains(excluded_names, vim.treesitter.query.get_node_text(node, bufnr))
+    end
   end
 end
 
 function M.get_nodes_to_paint(bufnr, marks_ns, mark, on_changedtree)
   local lang = util.get_lang(bufnr)
-  local query = ts.query.get_query(lang, 'function_definition')
+  local query
+  if has('nvim-0.9') == 1 then
+    query = ts.query.get(lang, 'function_definition')
+  else
+    query = ts.query.get_query(lang, 'function_definition')
+  end
   if query == nil then
     return
   end
