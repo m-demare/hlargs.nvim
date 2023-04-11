@@ -10,6 +10,21 @@ Highlight arguments' definitions and usages, asynchronously, using Treesitter
 | ![before](https://user-images.githubusercontent.com/34817965/153656813-8c037f48-70a8-486d-890a-484695b33067.png) | ![after](https://user-images.githubusercontent.com/34817965/153656820-65bc6144-c4e7-4b5c-a671-0ada8cd8c0eb.png) |
 
 
+## hlargs vs LSP semantic tokens
+Neovim 0.9 officially added support for LSP semantic tokens. These offer a much more
+complete and precise form of highlighting than hlargs. These two methods can coexist,
+for example by using hlargs for the languages where LSP tokens are not available, or
+they are available but don't define special highlight groups for arguments.
+
+Some advantages of hlargs are:
+
+- Available in languages without LSP
+- Available in languages whose LSP does not support semantic tokens
+- Some LSP might not have granular enough tokens to allow for arguments' highlighting
+- Treesitter parsers are generally easier to install than LSP servers
+- Treesitter parsers have wider platform compatibility than many LSP servers
+- Faster startup speed
+
 ## Installation
 This plugin is for [neovim](https://neovim.io/) only. Version 0.7+ is recommended. If
 you are using 0.6, use the branch `0.6-compat` and an appropriate nvim-treesitter
