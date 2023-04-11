@@ -15,17 +15,16 @@ This plugin is for [neovim](https://neovim.io/) only. Version 0.7+ is recommende
 you are using 0.6, use the branch `0.6-compat` and an appropriate nvim-treesitter
 version (installation instructions in the README of that branch).
 
+For nvim versions <0.9, nvim-treesitter is a required dependency. For 0.9 or higher,
+it is not necessary (though it's highly recommended, to install the parsers)
+
 [packer.nvim](https://github.com/wbthomason/packer.nvim):
 ```lua
-use {
-  'm-demare/hlargs.nvim',
-  requires = { 'nvim-treesitter/nvim-treesitter' }
-}
+use { 'm-demare/hlargs.nvim' }
 ```
 
 [vim-plug](https://github.com/junegunn/vim-plug):
 ```vim
-Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'm-demare/hlargs.nvim'
 ```
 

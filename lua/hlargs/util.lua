@@ -1,6 +1,6 @@
 local M = {}
 
-local parsers = require 'nvim-treesitter.parsers'
+local new_lang_api = vim.treesitter.language.register ~= nil
 
 local ignored_field_names = {
   c_sharp = {
@@ -148,12 +148,16 @@ function M.merge_ranges(bufnr, marks_ns, ranges)
 end
 
 function M.get_lang(bufnr)
-    local filetype = vim.fn.getbufvar(bufnr, '&filetype')
-    return parsers.ft_to_lang(filetype)
+  local filetype = vim.fn.getbufvar(bufnr, '&filetype')
+  if new_lang_api then
+    return vim.treesitter.language.get_lang(filetype)
+  else
+    return require('nvim-treesitter.parsers').ft_to_lang(filetype)
+  end
 end
 
 function M.is_supported(lang)
-    return function_or_catch_node_validators[lang] ~= nil
+  return function_or_catch_node_validators[lang] ~= nil
 end
 
 function M.print_node_text(node, bufnr)
