@@ -115,6 +115,7 @@ Currently these languages are supported
 - javascript
 - jsx (react)
 - julia
+- kotlin
 - lua
 - nix
 - php
