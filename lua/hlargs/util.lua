@@ -46,6 +46,7 @@ local function_or_catch_node_validators = {
   javascript = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause' },
   jsx = { 'function_declaration', 'method_definition', 'function', 'arrow_function', 'catch_clause' },
   julia = julia_is_function_node,
+  kotlin = { 'function_declaration', 'lambda_literal', 'secondary_constructor', 'class_declaration', 'catch_block' },
   lua = { 'function_declaration', 'function_definition' },
   nix = { 'function_expression' },
   php = { 'function_definition', 'method_declaration', 'anonymous_function_creation_expression', 'arrow_function', 'catch_clause' },
