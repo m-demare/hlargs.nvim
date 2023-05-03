@@ -70,7 +70,7 @@ end
 function M.end_task(bufnr, task)
   local buf_data = M.get(bufnr)
   local limits = nil
-  if task.mark then
+  if task.mark and vim.api.nvim_buf_is_loaded(bufnr) then
     local from, to = util.get_marks_limits(bufnr, buf_data.marks_ns, task.mark)
     limits = { from, to+1 }
   end
@@ -104,6 +104,7 @@ function M.end_task(bufnr, task)
 end
 
 function M.stop_older_contained(bufnr, task)
+  if not vim.api.nvim_buf_is_loaded(bufnr) then return end
   local buf_data = M.get(bufnr)
   local range_start, range_end = util.get_marks_limits(bufnr, buf_data.marks_ns, task.mark)
   for _, t in ipairs(buf_data.tasks) do

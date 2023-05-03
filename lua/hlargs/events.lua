@@ -31,7 +31,7 @@ local function find_and_paint_iteration(bufnr, task, co)
     delay = config.opts.performance.slow_parse_delay
   end
   vim.defer_fn(function()
-    if coroutine.status(co) ~= "dead" and not task.stop then
+    if coroutine.status(co) ~= "dead" and not task.stop and vim.api.nvim_buf_is_loaded(bufnr) then
       local buf_data = bufdata.get(bufnr)
       local marks_ns = buf_data.marks_ns
       local ts_cb
