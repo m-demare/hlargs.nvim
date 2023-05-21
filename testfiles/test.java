@@ -3,8 +3,17 @@ import java.util.*;
 public class Class {
     private final static Long arg2 = 25L;
 
-    private static int fn(int arg1, int arg2){
-        return arg1 * Class.arg2.intValue() +5;
+    private static int fn(Arg arg1, int arg2) {
+        return arg1.arg1() * Class.arg2.intValue() + arg2;
+    }
+
+    private static Optional<Builder> build(int field, Optional<Integer> anotherFieldOptional) {
+        return anotherFieldOptional.map(
+                anotherField ->
+                    Builder.builder()
+                        .field(field)
+                        .anotherField(anotherField)
+                        .build())
     }
 
     public static void main(String []args) {
