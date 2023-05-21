@@ -17,7 +17,8 @@ local ignored_field_names = {
     attrpath = { 'attr' }
   },
   java = {
-    _ = { 'field' }
+    method_invocation = { 'name' },
+    field_access = { 'field' }
   },
   vim = {
     scoped_identifier = { '_' }
