@@ -1,26 +1,27 @@
 local M = {}
-local util = require 'hlargs.util'
-local paint = require 'hlargs.paint'
+local util = require "hlargs.util"
+local paint = require "hlargs.paint"
 
 local data = {}
-local main_ns = vim.api.nvim_create_namespace('hlargs_main')
+local main_ns = vim.api.nvim_create_namespace "hlargs_main"
 
 M.TaskTypes = {
   PARTIAL = 1,
   TOTAL = 2,
-  SLOW = 3
+  SLOW = 3,
 }
 
 function M.get(bufnr)
-  data[bufnr] = data[bufnr] or {
-    change_idx = 0,
-    tasks = {},
-    debouncers = {},
-    ranges_to_parse = {},
-    marks_ns = vim.api.nvim_create_namespace(''),
-    initialized = false,
-    ts_cb_attached = false
-  }
+  data[bufnr] = data[bufnr]
+    or {
+      change_idx = 0,
+      tasks = {},
+      debouncers = {},
+      ranges_to_parse = {},
+      marks_ns = vim.api.nvim_create_namespace "",
+      initialized = false,
+      ts_cb_attached = false,
+    }
   return data[bufnr]
 end
 
@@ -31,17 +32,22 @@ end
 function M.new_task(bufnr, type, mark)
   local buf_data = M.get(bufnr)
   if buf_data.ignore then
-    error('Attempting to create task of type ' .. tostring(type) .. ' in invalid buffer ' .. tostring(bufnr))
+    error(
+      "Attempting to create task of type "
+        .. tostring(type)
+        .. " in invalid buffer "
+        .. tostring(bufnr)
+    )
   end
   buf_data.change_idx = buf_data.change_idx + 1
 
   local task = {
     mark = mark,
     change_idx = buf_data.change_idx,
-    ns = vim.api.nvim_create_namespace(''),
+    ns = vim.api.nvim_create_namespace "",
     stop = false,
     type = type,
-    stopped_tasks = {}
+    stopped_tasks = {},
   }
 
   table.insert(buf_data.tasks, task)
@@ -51,9 +57,7 @@ end
 function M.total_parse_is_running(bufnr)
   local buf_data = M.get(bufnr)
   for _, t in ipairs(buf_data.tasks) do
-    if t.type == M.TaskTypes.TOTAL then
-      return true
-    end
+    if t.type == M.TaskTypes.TOTAL then return true end
   end
   return false
 end
@@ -61,9 +65,7 @@ end
 local function clean_stopped_tasks(bufnr, buf_data, task)
   if not task.stopped_tasks then return end
   for _, t in ipairs(task.stopped_tasks) do
-    if t.mark then
-      vim.api.nvim_buf_del_extmark(bufnr, buf_data.marks_ns, t.mark)
-    end
+    if t.mark then vim.api.nvim_buf_del_extmark(bufnr, buf_data.marks_ns, t.mark) end
     paint.clear(bufnr, t.ns)
     clean_stopped_tasks(bufnr, buf_data, t)
   end
@@ -74,7 +76,7 @@ function M.end_task(bufnr, task)
   local limits = nil
   if task.mark and vim.api.nvim_buf_is_loaded(bufnr) then
     local from, to = util.get_marks_limits(bufnr, buf_data.marks_ns, task.mark)
-    limits = { from, to+1 }
+    limits = { from, to + 1 }
   end
 
   for _, t in ipairs(buf_data.tasks) do
@@ -89,14 +91,10 @@ function M.end_task(bufnr, task)
   paint.combine_nss(bufnr, main_ns, task.ns, limits)
   paint.clear(bufnr, task.ns)
 
-  if task.mark then
-    vim.api.nvim_buf_del_extmark(bufnr, buf_data.marks_ns, task.mark)
-  end
+  if task.mark then vim.api.nvim_buf_del_extmark(bufnr, buf_data.marks_ns, task.mark) end
   clean_stopped_tasks(bufnr, buf_data, task)
   for i = #buf_data.tasks, 1, -1 do
-    if buf_data.tasks[i] == task then
-      table.remove(buf_data.tasks, i)
-    end
+    if buf_data.tasks[i] == task then table.remove(buf_data.tasks, i) end
   end
   if #buf_data.tasks == 0 then
     -- Reset change_idx so that it doesn't grow too much
@@ -118,9 +116,7 @@ function M.stop_older_contained(bufnr, task)
         -- to it to later clean the namespaces
         table.insert(task.stopped_tasks, t)
         for i = #buf_data.tasks, 1, -1 do
-          if buf_data.tasks[i] == t then
-            table.remove(buf_data.tasks, i)
-          end
+          if buf_data.tasks[i] == t then table.remove(buf_data.tasks, i) end
         end
       end
     end
@@ -128,15 +124,9 @@ function M.stop_older_contained(bufnr, task)
 end
 
 local function clean_debouncers(buf_data)
-  if buf_data.debouncers.range_queue then
-    buf_data.debouncers.range_queue()
-  end
-  if buf_data.debouncers.total_parse then
-    buf_data.debouncers.total_parse()
-  end
-  if buf_data.debouncers.slow_parse then
-    buf_data.debouncers.slow_parse()
-  end
+  if buf_data.debouncers.range_queue then buf_data.debouncers.range_queue() end
+  if buf_data.debouncers.total_parse then buf_data.debouncers.total_parse() end
+  if buf_data.debouncers.slow_parse then buf_data.debouncers.slow_parse() end
 end
 
 -- Gets called on disable / BufDelete
@@ -145,19 +135,13 @@ function M.delete_data(bufnr)
   for _, t in ipairs(data[bufnr].tasks) do
     t.stop = true
     if vim.api.nvim_buf_is_valid(bufnr) then
-      if t.mark then
-        vim.api.nvim_buf_del_extmark(bufnr, data[bufnr].marks_ns, t.mark)
-      end
+      if t.mark then vim.api.nvim_buf_del_extmark(bufnr, data[bufnr].marks_ns, t.mark) end
       paint.clear(bufnr, t.ns)
     end
   end
-  if vim.api.nvim_buf_is_valid(bufnr) then
-    paint.clear(bufnr, main_ns)
-  end
+  if vim.api.nvim_buf_is_valid(bufnr) then paint.clear(bufnr, main_ns) end
   clean_debouncers(data[bufnr])
-  if data[bufnr].detach then
-    data[bufnr].detach()
-  end
+  if data[bufnr].detach then data[bufnr].detach() end
   data[bufnr] = nil
 end
 

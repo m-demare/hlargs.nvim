@@ -1,6 +1,6 @@
 local M = {}
-local config = require("hlargs.config")
-local colorpalette = require("hlargs.colorpalette")
+local config = require "hlargs.config"
+local colorpalette = require "hlargs.colorpalette"
 local hl_group = "Hlargs"
 
 -- Clears a namespace within limits
@@ -24,9 +24,7 @@ function M.set_extmark(bufnr, ns, start_row, start_col, end_row, end_col, hl_gro
 end
 
 local function get_hl_group(bufnr, ns, start_row, start_col, end_row, end_col, idx)
-  if not config.opts.use_colorpalette then
-    return hl_group
-  end
+  if not config.opts.use_colorpalette then return hl_group end
   local arg_name = vim.api.nvim_buf_get_text(bufnr, start_row, start_col, end_row, end_col, {})
   arg_name = arg_name[1]
   return colorpalette.get_hlgroup(arg_name)
@@ -38,18 +36,38 @@ function M.combine_nss(bufnr, dst, src, limits)
     from, to = { limits[1], 0 }, { limits[2], -1 }
   end
 
-  local ok, extmarks = pcall(vim.api.nvim_buf_get_extmarks, bufnr, src, from, to, { details = true })
+  local ok, extmarks =
+    pcall(vim.api.nvim_buf_get_extmarks, bufnr, src, from, to, { details = true })
   for idx, extmark in ipairs(extmarks) do
-    local start_row, start_col, end_row, end_col = extmark[2], extmark[3], extmark[4].end_row, extmark[4].end_col
+    local start_row, start_col, end_row, end_col =
+      extmark[2], extmark[3], extmark[4].end_row, extmark[4].end_col
     local hl_group = get_hl_group(bufnr, dst, start_row, start_col, end_row, end_col, idx)
-    M.set_extmark(bufnr, dst, start_row, start_col, end_row, end_col, hl_group, config.opts.hl_priority)
+    M.set_extmark(
+      bufnr,
+      dst,
+      start_row,
+      start_col,
+      end_row,
+      end_col,
+      hl_group,
+      config.opts.hl_priority
+    )
   end
 end
 
 setmetatable(M, {
   __call = function(self, bufnr, ns, node)
     local start_row, start_col, end_row, end_col = node:range()
-    M.set_extmark(bufnr, ns, start_row, start_col, end_row, end_col, hl_group, config.opts.hl_priority)
+    M.set_extmark(
+      bufnr,
+      ns,
+      start_row,
+      start_col,
+      end_row,
+      end_col,
+      hl_group,
+      config.opts.hl_priority
+    )
   end,
 })
 

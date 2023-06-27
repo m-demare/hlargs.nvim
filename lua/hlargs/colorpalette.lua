@@ -1,4 +1,4 @@
-local config = require("hlargs.config")
+local config = require "hlargs.config"
 
 local M = {}
 

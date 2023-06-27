@@ -9,7 +9,7 @@ local function attach(bufnr, callabcks)
     on_reload = function(...)
       if detached then return true end
       callabcks.on_reload(...)
-    end
+    end,
   })
 
   return function()
@@ -19,10 +19,11 @@ end
 
 local function defer(fn, time)
   local cancelled = false
-  local t = vim.defer_fn(function ()
+  local t = vim.defer_fn(function()
     if cancelled then return end
     fn()
   end, time)
+  -- stylua: ignore
   return function ()
     cancelled = true  -- It seems like there's some sort of race condition with these
                       -- timers, they occasionally get executed after being cancelled.
@@ -35,4 +36,3 @@ return {
   attach = attach,
   defer = defer,
 }
-

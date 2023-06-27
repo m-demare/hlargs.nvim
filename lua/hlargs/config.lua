@@ -28,7 +28,7 @@ local defaults = {
   paint_arg_usages = true,
   paint_catch_blocks = {
     declarations = false,
-    usages = false
+    usages = false,
   },
   extras = {
     named_parameters = false,
@@ -74,18 +74,17 @@ function M.setup(opts)
     end
 
     if M.opts.extras.named_parameters then
-      vim.api.nvim_set_hl(0, "@HlargsNamedParams",{ link = "Hlargs" })
+      vim.api.nvim_set_hl(0, "@HlargsNamedParams", { link = "Hlargs" })
     end
   end
 
   create_hl_groups()
 
-  local augroup = vim.api.nvim_create_augroup('hlargs-create-hlgroups', { clear = true })
-  vim.api.nvim_create_autocmd('ColorScheme', {
+  local augroup = vim.api.nvim_create_augroup("hlargs-create-hlgroups", { clear = true })
+  vim.api.nvim_create_autocmd("ColorScheme", {
     callback = create_hl_groups,
-    group = augroup
+    group = augroup,
   })
-
 end
 
 return M
