@@ -10,17 +10,19 @@ USAGE                                                           *hlargs-usage*
 
 Calling `setup` is required for the plugin to work. After calling it, it will
 be enabled by default, it can be enabled, disabled or toggled as follows:
->
+>lua
     require('hlargs').setup()
     require('hlargs').enable()
     require('hlargs').disable()
     require('hlargs').toggle()
+    require('hlargs').enable_buf(bufnr)
+    require('hlargs').disable_buf(bufnr)
 <
 
 Calling setup with no arguments will use the default settings. You can pass a
 table with the settings you want to override. The defaults are the following:
 
->
+>lua
     require('hlargs').setup {
       color = '#ef9062',
       use_colorpalette = false,
@@ -78,6 +80,24 @@ table with the settings you want to override. The defaults are the following:
 <
 
 ==============================================================================
+API                                                               *hlargs-api*
+
+These methods are available in |require('hlargs').*|
+
+enable_buf                                                 *hlargs-enable-buf*
+    Description: Enable highlighting for given buffer number.
+    Parameters:
+        bufnr:
+            type: number
+            default: Current buffer
+
+disable_buf                                               *hlargs-disable-buf*
+    Description: Disable highlighting for given buffer number.
+    Parameters:
+        bufnr:
+            type: number
+            default: Current buffer
+==============================================================================
 CONFIGURATION                                                  *hlargs-config*
 
 This section describes the configuration fields which can be passed to
@@ -95,7 +115,7 @@ color                                                    *hlargs-config-color*
     Default: '#ef9062'
 
 use_colorpalette                              *hlargs-config-use_colorpalette*
-    Description: If you want multiple colors for arguments..
+    Description: If you want multiple colors for arguments.
     Type: `bool`
     Default: `false`
 
@@ -106,6 +126,7 @@ colorpalette                                     *hlargs-config-colorpalette*
     `colorpalette` and `idx` calculate by polynomial rolling hash function
     Type: `table[]`
     Default:
+>lua
     {
         { fg = "#ef9062" },
         { fg = "#3AC6BE" },
@@ -122,6 +143,7 @@ colorpalette                                     *hlargs-config-colorpalette*
         { fg = "#EEF06D" },
         { fg = "#8FB272" },
       }
+<
 
 highlight                                            *hlargs-config-highlight*
     Description: Highlights to be applied to arguments, see |nvim_set_hl|.
@@ -139,7 +161,7 @@ disable                                                *hlargs-config-disable*
     ignored. Return `true` to disable, `false` to enable.
     Type: `function`
     Default:
->
+>lua
         disable = function(lang, bufnr)
             return vim.tbl_contains(opts.excluded_filetypes, lang)
         end
@@ -160,7 +182,7 @@ paint_catch_blocks                          *hlargs-config-paint_catch_blocks*
     colored or not.
     Type: `table`
     Default:
->
+>lua
     {
         declarations = false,
         usages = false
@@ -171,7 +193,7 @@ extras                                                  *hlargs-config-extras*
     Description: Extra syntactic highlighting (handled by |treesitter-highlight|)
     Type: `table`
     Default:
->
+>lua
     {
         named_parameters = false,
     }
@@ -189,7 +211,7 @@ excluded_argnames                            *hlargs-config-excluded_argnames*
     language/keyword by default.
     Type: `table`
     Default:
->
+>lua
     {
         declarations = {},
         usages = {
@@ -272,7 +294,7 @@ debounce                                                     *hlargs-debounce*
     Type: `table`
     Unit: ms
     Default:
->
+>lua
         {
             partial_parse = 3,
             partial_insert_mode = 100,

@@ -17,14 +17,6 @@ local function paint_nodes(bufnr, ns, node_group)
   end
 end
 
-local function ts_on_change(bufnr)
-  return function(changes)
-    for _, change in ipairs(changes) do
-      M.add_range_to_queue(bufnr, change[1], change[3])
-    end
-  end
-end
-
 local function find_and_paint_iteration(bufnr, task, co)
   local delay = config.opts.performance.parse_delay
   if task.type == bufdata.TaskTypes.SLOW then
@@ -34,12 +26,7 @@ local function find_and_paint_iteration(bufnr, task, co)
     if coroutine.status(co) ~= "dead" and not task.stop and vim.api.nvim_buf_is_loaded(bufnr) then
       local buf_data = bufdata.get(bufnr)
       local marks_ns = buf_data.marks_ns
-      local ts_cb
-      if not buf_data.ts_cb_attached then
-        ts_cb = ts_on_change(bufnr)
-        buf_data.ts_cb_attached = true
-      end
-      local running, arg_nodes, usage_nodes = coroutine.resume(co, bufnr, marks_ns, task.mark, ts_cb)
+      local running, arg_nodes, usage_nodes = coroutine.resume(co, bufnr, marks_ns, task.mark)
       if task.mark then
         -- Mainly to prevent tasks from insert mode from accumulating
         -- Can't do this on new_task because the tasks' marks
@@ -183,17 +170,17 @@ function M.buf_enter(data)
     if not buf_data.ignore then
       M.schedule_total_repaint(bufnr, true)
     end
-  end
-  if buf_data.ignore then return end
+    if buf_data.ignore then return end
 
-  buf_data.detach = attach(bufnr, {
-    on_lines = function(ev, bufnr, _, from, old_to, to)
-      M.add_range_to_queue(bufnr, from, to)
-    end,
-    on_reload = function (ev, bufnr)
-      M.schedule_total_repaint(bufnr)
-    end
-  })
+    buf_data.detach = attach(bufnr, {
+      on_lines = function(ev, bufnr, _, from, old_to, to)
+        M.add_range_to_queue(bufnr, from, to)
+      end,
+      on_reload = function (ev, bufnr)
+        M.schedule_total_repaint(bufnr)
+      end
+    })
+  end
 end
 
 function M.filetype(data)
@@ -230,13 +217,39 @@ end
 function M.disable()
   if enabled then
     enabled = false
-    pcall(vim.cmd, "autocmd! Hlargs")
-    pcall(vim.cmd, "augroup! Hlargs")
+    vim.api.nvim_clear_autocmds({group = 'Hlargs'})
 
     for bufnr, _ in pairs(bufdata.get_all()) do
       bufdata.delete_data(bufnr)
     end
   end
+end
+
+local function validate_bufnr(bufnr)
+  if not vim.api.nvim_buf_is_valid(bufnr) then
+    error('Invalid buffer number ' .. tostring(bufnr))
+  end
+end
+
+function M.enable_buf(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  validate_bufnr(bufnr)
+
+  M.buf_delete({buf = bufnr})
+  M.buf_enter({buf = bufnr})
+end
+
+function M.disable_buf(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  validate_bufnr(bufnr)
+
+  -- Remove current highlights
+  M.buf_delete({buf = bufnr})
+
+  -- Prevent from reattaching
+  local buf_data = bufdata.get(bufnr)
+  buf_data.initialized = true
+  buf_data.ignore = true
 end
 
 function M.toggle()

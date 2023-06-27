@@ -30,7 +30,9 @@ end
 
 function M.new_task(bufnr, type, mark)
   local buf_data = M.get(bufnr)
-  if buf_data.ignore then error('Attempting to create task of type ' .. tostring(type) .. ' in invalid buffer') end
+  if buf_data.ignore then
+    error('Attempting to create task of type ' .. tostring(type) .. ' in invalid buffer ' .. tostring(bufnr))
+  end
   buf_data.change_idx = buf_data.change_idx + 1
 
   local task = {

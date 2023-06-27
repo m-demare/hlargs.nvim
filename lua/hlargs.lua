@@ -17,4 +17,7 @@ M.toggle = events.toggle
 M.disable = events.disable
 M.enable = events.enable
 
+M.disable_buf = events.disable_buf
+M.enable_buf = events.enable_buf
+
 return M
