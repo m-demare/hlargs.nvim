@@ -74,7 +74,7 @@ function M.setup(opts)
     end
 
     if M.opts.extras.named_parameters then
-      vim.cmd([[hi link @HlargsNamedParams Hlargs]])
+      vim.api.nvim_set_hl(0, "@HlargsNamedParams",{ link = "Hlargs" })
     end
   end
 
