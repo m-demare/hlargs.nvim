@@ -14,7 +14,8 @@ Highlight arguments' definitions and usages, asynchronously, using Treesitter
 Neovim 0.9 officially added support for LSP semantic tokens. These offer a much more
 complete and precise form of highlighting than hlargs. These two methods can coexist,
 for example by using hlargs for the languages where LSP tokens are not available, or
-they are available but don't define special highlight groups for arguments.
+they are available but don't define special highlight groups for arguments (check out
+[:h hlargs-lsp](https://github.com/m-demare/hlargs.nvim/blob/07e33afafd9d32b304a8557bfc1772516c005d75/doc/hlargs.txt#L306) for an example).
 
 Some advantages of hlargs are:
 
