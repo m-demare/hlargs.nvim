@@ -1,6 +1,7 @@
 local M = {}
 
 local defaults = {
+  enabled = true,
   color = "#ef9062",
   use_colorpalette = false,
   colorpalette = {

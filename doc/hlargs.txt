@@ -24,6 +24,7 @@ table with the settings you want to override. The defaults are the following:
 
 >lua
     require('hlargs').setup {
+      enabled = true,
       color = '#ef9062',
       use_colorpalette = false,
       colorpalette = {
@@ -106,6 +107,11 @@ vim.tbl_deep_extend (giving priority to user's settings), so you only have to
 change the settings you want to differ.
 
 For performance related configurations, see |hlargs-performance|
+
+enabled                                                *hlargs-config-enabled*
+    Description: Whether to enable hlargs automatically after setup or not
+    Type: `bool`
+    Default: true
 
 color                                                    *hlargs-config-color*
     Description: Hex color to be applied to arguments. Used if `highlight` is
