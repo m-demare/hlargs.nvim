@@ -40,6 +40,7 @@ end
 local function_or_catch_node_validators = {
   c = { "function_definition" },
   cpp = { "function_definition", "lambda_expression", "catch_clause" },
+  cuda = { "function_definition", "lambda_expression", "catch_clause" },
   c_sharp = { "constructor_declaration", "method_declaration", "lambda_expression" },
   go = { "function_declaration", "method_declaration", "func_literal" },
   java = { "method_declaration", "lambda_expression", "catch_clause" },
@@ -60,7 +61,7 @@ local function_or_catch_node_validators = {
   zig = { "TopLevelDecl" },
 }
 
-local multi_body_langs = { "ruby", "cpp", "julia" }
+local multi_body_langs = { "ruby", "cpp",  "cuda", "julia" }
 
 function M.ignore_node(filetype, node)
   if ignored_field_names[filetype] and node:parent() then
