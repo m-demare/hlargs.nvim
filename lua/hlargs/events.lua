@@ -195,10 +195,11 @@ function M.enable()
   if not enabled then
     enabled = true
     local augroup = vim.api.nvim_create_augroup("Hlargs", { clear = true })
-    vim.api.nvim_create_autocmd("BufEnter", { callback = M.buf_enter, group = augroup })
-    vim.api.nvim_create_autocmd("FileType", { callback = M.filetype, group = augroup })
-    vim.api.nvim_create_autocmd("BufDelete", { callback = M.buf_delete, group = augroup })
-    vim.api.nvim_create_autocmd("FileChangedShellPost", { callback = M.external_file_change, group = augroup })
+    local create_autocmd = vim.api.nvim_create_autocmd
+    create_autocmd("BufEnter", { callback = M.buf_enter, group = augroup })
+    create_autocmd("FileType", { callback = M.filetype, group = augroup })
+    create_autocmd("BufDelete", { callback = M.buf_delete, group = augroup })
+    create_autocmd("FileChangedShellPost", { callback = M.external_file_change, group = augroup })
     local bufs = vim.api.nvim_list_bufs()
     for _, b in ipairs(bufs) do
       if vim.api.nvim_buf_is_loaded(b) then M.buf_enter { buf = b } end

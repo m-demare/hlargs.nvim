@@ -11,9 +11,7 @@ M.setup = function(opts)
         ]]
   end
   config.setup(opts)
-  if config.opts.enabled then
-    M.enable()
-  end
+  if config.opts.enabled then M.enable() end
 end
 M.toggle = events.toggle
 M.disable = events.disable
