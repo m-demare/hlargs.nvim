@@ -186,6 +186,11 @@ function M.buf_delete(data)
   bufdata.delete_data(bufnr)
 end
 
+function M.external_file_change(data)
+  M.buf_delete(data)
+  M.buf_enter(data)
+end
+
 function M.enable()
   if not enabled then
     enabled = true
@@ -193,6 +198,7 @@ function M.enable()
     vim.api.nvim_create_autocmd("BufEnter", { callback = M.buf_enter, group = augroup })
     vim.api.nvim_create_autocmd("FileType", { callback = M.filetype, group = augroup })
     vim.api.nvim_create_autocmd("BufDelete", { callback = M.buf_delete, group = augroup })
+    vim.api.nvim_create_autocmd("FileChangedShellPost", { callback = M.external_file_change, group = augroup })
     local bufs = vim.api.nvim_list_bufs()
     for _, b in ipairs(bufs) do
       if vim.api.nvim_buf_is_loaded(b) then M.buf_enter { buf = b } end
