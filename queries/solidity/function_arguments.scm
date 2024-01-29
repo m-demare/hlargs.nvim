@@ -4,3 +4,6 @@
 (constructor_definition
   (parameter
     name: (identifier) @argname))
+(modifier_definition
+  (parameter
+    name: (identifier) @argname))

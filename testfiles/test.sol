@@ -6,6 +6,11 @@ contract ArgumentHighlightingTest {
         value = initialValue;
     }
 
+    modifier onlyCheck(uint256 check){
+      require(check>10, "Not check");
+      _;
+    }
+
     function updateValue(uint256 newValue) external {
         value = newValue;
     }
@@ -14,7 +19,7 @@ contract ArgumentHighlightingTest {
         value *= factor;
     }
 
-    function addTwoValues(uint256 a, uint256 b) external view returns (uint256) {
+    function addTwoValues(uint256 a, uint256 b) external view onlyCheck(a) returns (uint256) {
         return a + b;
     }
 }
