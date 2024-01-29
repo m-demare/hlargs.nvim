@@ -124,6 +124,7 @@ Currently these languages are supported
 - r
 - ruby
 - rust
+- solidity
 - tsx (react)
 - typescript
 - vim
