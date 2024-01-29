@@ -55,13 +55,14 @@ local function_or_catch_node_validators = {
   r = { "function_definition", "lambda_function" },
   ruby = { "method", "lambda", "block", "do_block", "rescue" },
   rust = { "function_item" },
+  solidity = { "function_declaration", "function_definition", "constructor_definition", "modifier_definition" },
   tsx = { "function_declaration", "method_definition", "function", "arrow_function", "catch_clause" },
   typescript = { "function_declaration", "method_definition", "function", "arrow_function", "catch_clause" },
   vim = { "function_definition", "lambda_expression" },
   zig = { "TopLevelDecl" },
 }
 
-local multi_body_langs = { "ruby", "cpp", "cuda", "julia" }
+local multi_body_langs = { "ruby", "cpp", "cuda", "julia", "solidity" }
 
 function M.ignore_node(filetype, node)
   if ignored_field_names[filetype] and node:parent() then
