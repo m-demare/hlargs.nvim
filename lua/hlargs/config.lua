@@ -4,6 +4,7 @@ local defaults = {
   enabled = true,
   color = "#ef9062",
   use_colorpalette = false,
+  sequential_colorpalette = false,
   colorpalette = {
     { fg = "#ef9062" },
     { fg = "#3AC6BE" },

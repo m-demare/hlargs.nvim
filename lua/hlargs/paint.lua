@@ -1,6 +1,7 @@
 local M = {}
 local config = require "hlargs.config"
 local colorpalette = require "hlargs.colorpalette"
+local util = require "hlargs.util"
 local hl_group = "Hlargs"
 
 -- Clears a namespace within limits
@@ -27,7 +28,11 @@ local function get_hl_group(bufnr, ns, start_row, start_col, end_row, end_col, i
   if not config.opts.use_colorpalette then return hl_group end
   local arg_name = vim.api.nvim_buf_get_text(bufnr, start_row, start_col, end_row, end_col, {})
   arg_name = arg_name[1]
-  return colorpalette.get_hlgroup(arg_name)
+  if config.opts.sequential_colorpalette then
+    return colorpalette.get_hlgroup_sequential(bufnr, start_row, start_col, end_row, end_col, arg_name)
+  else
+    return colorpalette.get_hlgroup_hashed(arg_name)
+  end
 end
 
 function M.combine_nss(bufnr, dst, src, limits)

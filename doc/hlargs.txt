@@ -27,6 +27,7 @@ table with the settings you want to override. The defaults are the following:
       enabled = true,
       color = '#ef9062',
       use_colorpalette = false,
+      sequential_colorpalette = false,
       colorpalette = {
         { fg = "#ef9062" },
         { fg = "#3AC6BE" },
@@ -122,6 +123,12 @@ color                                                    *hlargs-config-color*
 
 use_colorpalette                              *hlargs-config-use_colorpalette*
     Description: If you want multiple colors for arguments.
+    Type: `bool`
+    Default: `false`
+
+sequential_colorpalette
+    Description: Uses the colorpalette in sequential order for highlight
+    groups instead of the hash function.
     Type: `bool`
     Default: `false`
 

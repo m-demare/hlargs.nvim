@@ -1,4 +1,6 @@
 local config = require "hlargs.config"
+local parse = require "hlargs.parse"
+local util = require "hlargs.util"
 
 local M = {}
 
@@ -17,12 +19,32 @@ local hash_arg = function(arg_name)
   return hash_value
 end
 
-M.get_hlgroup = function(arg_name)
+M.get_hlgroup_hashed = function(arg_name)
   local config = config.opts
   local size = #config.colorpalette
   local idx = hash_arg(arg_name)
   local current_color = idx % size
 
+  return "Hlarg" .. tonumber(current_color)
+end
+
+M.get_hlgroup_sequential = function(bufnr, start_row, start_col, end_row, end_col, arg_name)
+  local lang = util.get_lang(bufnr)
+  local parser = vim.treesitter.get_parser(bufnr, lang) 
+  local root = parser:parse()[1]:root()
+  local node = root:named_descendant_for_range(start_row, start_col, end_row, end_col)
+  local functionNode = util.get_first_function_parent(lang, node)
+  local arg_nodes, arg_names_set = parse.get_args(bufnr, functionNode)
+  local current_color = 1
+  local node_index = 1
+  for _, arg_node in ipairs(arg_nodes) do
+    local node_name = vim.treesitter.get_node_text(arg_node, bufnr)
+    if node_name == arg_name then
+      current_color = node_index
+      break
+    end
+    node_index = node_index + 1
+  end
   return "Hlarg" .. tonumber(current_color)
 end
 
