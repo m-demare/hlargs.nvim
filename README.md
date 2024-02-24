@@ -106,6 +106,51 @@ require('hlargs').toggle()
 ## Dynamically change color
 If you want to change the color dynamically, according to filetype or whatever, you can do that using the highlight group `Hlargs`
 
+## Add text decorations
+
+Text decorations can be applied using the `highlight` option
+
+A list of text decorations can be found [here](https://neovim.io/doc/user/api.html#nvim_set_hl()).
+
+Text decorations example:
+```lua
+{
+		highlight = {
+			fg ="#ef9062",
+			italic = true,
+		}
+}
+```
+
+Text decorations can be used in combination with the color palette, applying to every color in the color palette.
+
+Text decorations with color palette example:
+```lua
+{
+	use_colorpalette = true,
+	sequential_colorpalette = true,
+	colorpalette = {
+	  { fg = "#ef9062" },
+	  { fg = "#3AC6BE" },
+	  { fg = "#35D27F" },
+	  { fg = "#EB75D6" },
+	  { fg = "#E5D180" },
+	  { fg = "#8997F5" },
+	  { fg = "#D49DA5" },
+	  { fg = "#7FEC35" },
+	  { fg = "#F6B223" },
+	  { fg = "#F67C1B" },
+	  { fg = "#DE9A4E" },
+	  { fg = "#BBEA87" },
+	  { fg = "#EEF06D" },
+	  { fg = "#8FB272" },
+	},
+	highlight = {
+	  italic = true,
+	}
+}
+```
+
 ## Supported languages
 Currently these languages are supported
 - c
