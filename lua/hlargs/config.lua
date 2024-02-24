@@ -43,16 +43,6 @@ local defaults = {
       lua = { "self" },
     },
   },
-  textDecorations = {
-    italic = false,
-    bold = false,
-    standout = false,
-    underline = false,
-    undercurl = false,
-    underdouble = false,
-    underdashed = false,
-    strikethrough = false,
-  },
   performance = {
     parse_delay = 1,
     slow_parse_delay = 50,
@@ -74,19 +64,14 @@ function M.setup(opts)
     if M.opts.use_colorpalette then
       for i, color in pairs(M.opts.colorpalette) do
         color.default = true
-        vim.api.nvim_set_hl(0, "Hlarg" .. i, vim.tbl_deep_extend("force", color, M.opts.textDecorations))
+        if(not vim.tbl_isempty(M.opts.highlight)) then
+          color = vim.tbl_deep_extend("force",color,M.opts.highlight)
+        end
+        vim.api.nvim_set_hl(0, "Hlarg" .. i, color)
       end
     else
       if vim.tbl_isempty(M.opts.highlight) then
-        local color = {
-          fg = M.opts.color,
-          default = true,
-        }
-        vim.api.nvim_set_hl(
-          0,
-          "Hlargs",
-          vim.tbl_deep_extend("force", color, M.opts.textDecorations)
-        )
+        vim.api.nvim_set_hl(0, "Hlargs", { fg = M.opts.color, default = true })
       else
         M.opts.highlight.default = true
         vim.api.nvim_set_hl(0, "Hlargs", M.opts.highlight)
