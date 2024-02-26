@@ -29,7 +29,14 @@ local function get_hl_group(bufnr, ns, start_row, start_col, end_row, end_col, i
   local arg_name = vim.api.nvim_buf_get_text(bufnr, start_row, start_col, end_row, end_col, {})
   arg_name = arg_name[1]
   if config.opts.sequential_colorpalette then
-    return colorpalette.get_hlgroup_sequential(bufnr, start_row, start_col, end_row, end_col, arg_name)
+    return colorpalette.get_hlgroup_sequential(
+      bufnr,
+      start_row,
+      start_col,
+      end_row,
+      end_col,
+      arg_name
+    )
   else
     return colorpalette.get_hlgroup_hashed(arg_name)
   end

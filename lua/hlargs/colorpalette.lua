@@ -30,7 +30,7 @@ end
 
 M.get_hlgroup_sequential = function(bufnr, start_row, start_col, end_row, end_col, arg_name)
   local lang = util.get_lang(bufnr)
-  local parser = vim.treesitter.get_parser(bufnr, lang) 
+  local parser = vim.treesitter.get_parser(bufnr, lang)
   local root = parser:parse()[1]:root()
   local node = root:named_descendant_for_range(start_row, start_col, end_row, end_col)
   local functionNode = util.get_first_function_parent(lang, node)

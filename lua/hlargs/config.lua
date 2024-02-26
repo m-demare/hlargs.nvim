@@ -64,8 +64,8 @@ function M.setup(opts)
     if M.opts.use_colorpalette then
       for i, color in pairs(M.opts.colorpalette) do
         color.default = true
-        if(not vim.tbl_isempty(M.opts.highlight)) then
-          color = vim.tbl_deep_extend("force",color,M.opts.highlight)
+        if not vim.tbl_isempty(M.opts.highlight) then
+          color = vim.tbl_deep_extend("force", color, M.opts.highlight)
         end
         vim.api.nvim_set_hl(0, "Hlarg" .. i, color)
       end
