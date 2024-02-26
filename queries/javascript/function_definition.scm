@@ -1,6 +1,6 @@
 (function_declaration) @fn
 (method_definition) @fn
-(function) @fn
+(function_expression) @fn
 (arrow_function) @fn
 (catch_clause) @catch
 
