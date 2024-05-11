@@ -34,6 +34,8 @@ end
 
 function M.get_args(bufnr, func_node)
   local lang = util.get_lang(bufnr)
+  if util.has_no_arg_defs(lang) then return {}, {} end
+
   local query = ts_get_query(lang, "function_arguments")
 
   local start_row, _, end_row, _ = func_node:range()
@@ -72,6 +74,7 @@ end
 function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
   local lang = util.get_lang(bufnr)
   local query = ts_get_query(lang, "variables")
+  local has_no_arg_defs = util.has_no_arg_defs(lang)
 
   local usages_nodes = {}
   for _, body_node in ipairs(body_nodes) do
@@ -85,7 +88,7 @@ function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
       if capture_name ~= "ignore" then
         local arg_name = ts_get_node_text(node, bufnr)
         if
-          arg_names_set[arg_name]
+          (arg_names_set[arg_name] or has_no_arg_defs)
           and not util.ignore_node(lang, node)
           and (arg_names_set[arg_name] ~= "catch" or config.opts.paint_catch_blocks.usages)
         then
@@ -105,6 +108,7 @@ end
 
 function M.get_nodes_to_paint(bufnr, marks_ns, mark)
   local lang = util.get_lang(bufnr)
+  local has_no_arg_defs = util.has_no_arg_defs(lang)
   local query = ts_get_query(lang, "function_definition")
   if query == nil then return end
 
@@ -129,7 +133,7 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
     local name = query.captures[id] -- name of the capture
     local arg_nodes, arg_names_set = M.get_args(bufnr, node)
     local usages_nodes = {}
-    if config.opts.paint_arg_usages and #arg_nodes > 0 then
+    if config.opts.paint_arg_usages and (#arg_nodes > 0 or has_no_arg_defs) then
       local body_nodes = M.get_body_nodes(bufnr, node)
       local limits = nil
       if mark then

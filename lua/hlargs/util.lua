@@ -38,6 +38,7 @@ end
 
 -- stylua: ignore
 local function_or_catch_node_validators = {
+  bash = { "function_definition" },
   c = { "function_definition" },
   cpp = { "function_definition", "lambda_expression", "catch_clause" },
   cuda = { "function_definition", "lambda_expression", "catch_clause" },
@@ -63,6 +64,7 @@ local function_or_catch_node_validators = {
 }
 
 local multi_body_langs = { "ruby", "cpp", "cuda", "julia", "solidity" }
+local no_arg_defs_langs = { "bash" }
 
 function M.ignore_node(filetype, node)
   if ignored_field_names[filetype] and node:parent() then
@@ -102,6 +104,10 @@ end
 -- but instead everything after the parameters is body
 function M.is_multi_body_lang(lang)
   return vim.tbl_contains(multi_body_langs, lang)
+end
+
+function M.has_no_arg_defs(lang)
+  return vim.tbl_contains(no_arg_defs_langs, lang)
 end
 
 function M.get_marks_limits(bufnr, marks_ns, extmark)
