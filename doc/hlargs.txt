@@ -215,7 +215,7 @@ extras                                                  *hlargs-config-extras*
 hl_priority                                        *hlargs-config-hl_priority*
     Description: Priority for highlighting
     Type: `number`
-    Default: 10000
+    Default: 120
 
 excluded_argnames                            *hlargs-config-excluded_argnames*
     Description: Some languages use keywords that you may not want highlighted
