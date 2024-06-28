@@ -1,5 +1,5 @@
 ;; extends
 
-(default_argument
-  name: (identifier) @HlargsNamedParams)
-
+(parameter
+          name: (identifier) @HlargsNamedParams
+          default: _)

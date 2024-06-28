@@ -1,7 +1,6 @@
-(formal_parameters
-  [
-    (identifier) @argname
-    (default_parameter
-      (identifier) @argname)
-  ])
-
+(parameters
+  parameter: (
+    parameter
+      name: (identifier) @argname
+  )
+)
