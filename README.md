@@ -34,6 +34,13 @@ version (installation instructions in the README of that branch).
 For nvim versions <0.9, nvim-treesitter is a required dependency. For 0.9 or higher,
 it is not necessary (though it's highly recommended, to install the parsers)
 
+[lazy.nvim](https://github.com/folke/lazy.nvim)
+```lua
+return {
+    'm-demare/hlargs.nvim',
+}
+```
+
 [packer.nvim](https://github.com/wbthomason/packer.nvim):
 ```lua
 use { 'm-demare/hlargs.nvim' }
