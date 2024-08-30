@@ -1,1 +1,4 @@
-(FnProto (ParamDeclList (ParamDecl parameter: (IDENTIFIER) @argname)))
+(function_declaration
+  (parameters
+    (parameter
+      name: (identifier) @argname)))

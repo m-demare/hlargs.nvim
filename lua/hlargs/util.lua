@@ -60,7 +60,7 @@ local function_or_catch_node_validators = {
   tsx = { "function_declaration", "function_expression", "method_definition", "arrow_function", "catch_clause" },
   typescript = { "function_declaration", "function_expression", "method_definition", "arrow_function", "catch_clause" },
   vim = { "function_definition", "lambda_expression" },
-  zig = { "TopLevelDecl" },
+  zig = { "function_declaration" },
 }
 
 local multi_body_langs = { "ruby", "cpp", "cuda", "julia", "solidity" }

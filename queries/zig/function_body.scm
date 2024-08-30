@@ -1,1 +1,2 @@
-(TopLevelDecl (FnProto) (Block) @body)
+(function_declaration
+  body: (block) @body)

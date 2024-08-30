@@ -1,1 +1,1 @@
-(TopLevelDecl (FnProto) (Block)) @fn
+(function_declaration) @fn
