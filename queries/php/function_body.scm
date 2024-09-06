@@ -2,7 +2,7 @@
   body: (compound_statement) @body)
 (method_declaration
   body: (compound_statement) @body)
-(anonymous_function_creation_expression
+(anonymous_function
   body: (compound_statement) @body)
 (arrow_function
   body: (_) @body)
