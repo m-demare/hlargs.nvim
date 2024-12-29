@@ -10,10 +10,10 @@ local defer = async.defer
 
 local enabled = false
 
-local function paint_nodes(bufnr, ns, node_group)
+local function paint_nodes(bufnr, ns, node_group, hl_group)
   if not node_group then return end
   for _, node in ipairs(node_group) do
-    paint(bufnr, ns, node)
+    paint(bufnr, ns, node, hl_group)
   end
 end
 
@@ -24,7 +24,8 @@ local function find_and_paint_iteration(bufnr, task, co)
     if coroutine.status(co) ~= "dead" and not task.stop and vim.api.nvim_buf_is_loaded(bufnr) then
       local buf_data = bufdata.get(bufnr)
       local marks_ns = buf_data.marks_ns
-      local running, arg_nodes, usage_nodes = coroutine.resume(co, bufnr, marks_ns, task.mark)
+      local running, arg_nodes, unused_arg_nodes, usage_nodes =
+        coroutine.resume(co, bufnr, marks_ns, task.mark)
       if task.mark then
         -- Mainly to prevent tasks from insert mode from accumulating
         -- Can't do this on new_task because the tasks' marks
@@ -33,6 +34,9 @@ local function find_and_paint_iteration(bufnr, task, co)
       end
       if running then
         if config.opts.paint_arg_declarations then paint_nodes(bufnr, task.ns, arg_nodes) end
+        if config.opts.extras.unused_args then
+          paint_nodes(bufnr, task.ns, unused_arg_nodes, paint.hl_group .. "Unused")
+        end
         paint_nodes(bufnr, task.ns, usage_nodes)
         find_and_paint_iteration(bufnr, task, co)
       end

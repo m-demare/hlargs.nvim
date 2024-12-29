@@ -34,6 +34,7 @@ local defaults = {
   },
   extras = {
     named_parameters = false,
+    unused_args = false,
   },
   hl_priority = 120,
   excluded_argnames = {
@@ -77,9 +78,13 @@ function M.setup(opts)
         vim.api.nvim_set_hl(0, "Hlargs", M.opts.highlight)
       end
     end
+    if M.opts.extras.unused_args then
+      vim.api.nvim_set_hl(0, "HlargsUnused", M.opts.extras.unused_args)
+    end
 
     if M.opts.extras.named_parameters then
-      vim.api.nvim_set_hl(0, "@HlargsNamedParams", { link = "Hlargs" })
+      if M.opts.extras.named_parameters == true then M.opts.extras.named_parameters = { link = "Hlargs" } end
+      vim.api.nvim_set_hl(0, "@HlargsNamedParams", M.opts.extras.named_parameters)
     end
   end
 
