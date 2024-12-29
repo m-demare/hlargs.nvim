@@ -14,17 +14,31 @@ else
   ts_get_node_text = ts.query.get_node_text
 end
 
--- If arguments were modified, the whole function has to be reparsed
-local function fix_mark(bufnr, marks_ns, root_node, mark)
-  local lang = util.get_lang(bufnr)
-  local query = ts_get_query(lang, "function_arguments")
+-- If arguments were modified, or if extras.unused_args is enabled,
+-- the whole function has to be reparsed
+local function fix_mark(lang, bufnr, marks_ns, root_node, mark)
   local orig_from, orig_to = util.get_marks_limits(bufnr, marks_ns, mark)
   local new_from, new_to = orig_from, orig_to
-  for id, node in query:iter_captures(root_node, bufnr, orig_from, orig_to + 1) do
+  local arg_query = ts_get_query(lang, "function_arguments")
+
+  local function fix_range(node)
     local start_row, _, end_row, _ = util.get_first_function_parent(lang, node):range()
     if start_row < new_from then new_from = start_row end
     if end_row > new_to then new_to = end_row end
   end
+
+  for _, node in arg_query:iter_captures(root_node, bufnr, orig_from, orig_to + 1) do
+    fix_range(node)
+    break
+  end
+  if config.opts.extras.unused_args then
+    local var_query = ts_get_query(lang, "variables")
+    for _, node in var_query:iter_captures(root_node, bufnr, orig_from, orig_to + 1) do
+      fix_range(node)
+      break
+    end
+  end
+
   vim.api.nvim_buf_set_extmark(bufnr, marks_ns, new_from, 0, {
     id = mark,
     end_row = new_to,
@@ -76,6 +90,7 @@ function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
   local query = ts_get_query(lang, "variables")
   local has_no_arg_defs = util.has_no_arg_defs(lang)
 
+  local used_args = {}
   local usages_nodes = {}
   for _, body_node in ipairs(body_nodes) do
     local start_row, _, end_row, _ = body_node:range()
@@ -87,17 +102,16 @@ function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
       local capture_name = query.captures[id]
       if capture_name ~= "ignore" then
         local arg_name = ts_get_node_text(node, bufnr)
-        if
-          (arg_names_set[arg_name] or has_no_arg_defs)
-          and not util.ignore_node(lang, node)
-          and (arg_names_set[arg_name] ~= "catch" or config.opts.paint_catch_blocks.usages)
-        then
-          table.insert(usages_nodes, node)
+        if (arg_names_set[arg_name] or has_no_arg_defs) and not util.ignore_node(lang, node) then
+          if config.opts.extras.unused_args then used_args[arg_name] = true end
+          if arg_names_set[arg_name] ~= "catch" or config.opts.paint_catch_blocks.usages then
+            table.insert(usages_nodes, node)
+          end
         end
       end
     end
   end
-  return usages_nodes
+  return usages_nodes, used_args
 end
 
 local function not_excluded_name(bufnr, excluded_names)
@@ -118,7 +132,7 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
 
   local start_row, _, end_row, _ = root:range()
   if mark then
-    fix_mark(bufnr, marks_ns, root, mark)
+    fix_mark(lang, bufnr, marks_ns, root, mark)
     start_row, end_row = util.get_marks_limits(bufnr, marks_ns, mark)
   end
 
@@ -132,7 +146,7 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
     end
     local name = query.captures[id] -- name of the capture
     local arg_nodes, arg_names_set = M.get_args(bufnr, node)
-    local usages_nodes = {}
+    local usages_nodes, used_args = {}, {}
     if config.opts.paint_arg_usages and (#arg_nodes > 0 or has_no_arg_defs) then
       local body_nodes = M.get_body_nodes(bufnr, node)
       local limits = nil
@@ -142,7 +156,7 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
       end
       if body_nodes and #body_nodes > 0 then
         -- So that empty functions don't fail
-        usages_nodes = M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
+        usages_nodes, used_args = M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
       end
     end
     if config.opts.excluded_argnames.declarations[lang] then
@@ -157,7 +171,13 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
         usages_nodes
       )
     end
-    coroutine.yield(arg_nodes, usages_nodes)
+    local used_arg_nodes, unused_arg_nodes = arg_nodes, {}
+    if config.opts.extras.unused_args then
+      used_arg_nodes, unused_arg_nodes = util.tbl_spit_by(function(argnode)
+        return used_args[ts_get_node_text(argnode, bufnr)] or false
+      end, arg_nodes)
+    end
+    coroutine.yield(used_arg_nodes, unused_arg_nodes, usages_nodes)
   end
 end
 

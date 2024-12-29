@@ -176,4 +176,11 @@ function M.print_node_text(node, bufnr)
   end
 end
 
+function M.tbl_spit_by(pred, tbl)
+  return vim.tbl_filter(pred, tbl),
+    vim.tbl_filter(function(entry)
+      return not pred(entry)
+    end, tbl)
+end
+
 return M

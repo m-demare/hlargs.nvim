@@ -57,6 +57,7 @@ table with the settings you want to override. The defaults are the following:
       },
       extras = {
         named_parameters = false,
+        unused_args = false,
       },
       hl_priority = 120,
       excluded_argnames = {
@@ -203,12 +204,14 @@ paint_catch_blocks                          *hlargs-config-paint_catch_blocks*
 <
 
 extras                                                  *hlargs-config-extras*
-    Description: Extra syntactic highlighting (handled by |treesitter-highlight|)
+    Description: Extra syntactic highlighting. Each parameter can be `false`,
+    or a table of highlights to be applied to the group (see |nvim_set_hl|)
     Type: `table`
     Default:
 >lua
     {
         named_parameters = false,
+        unused_args = false, -- Could have a performance impact
     }
 <
 

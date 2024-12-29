@@ -1,6 +1,8 @@
 # hlargs.nvim
 
-Highlight arguments' definitions and usages, asynchronously, using Treesitter
+Highlight arguments' definitions and usages, asynchronously, using Treesitter.
+
+Optionally, apply special highlighting for unused arguments
 
 
 ## Preview
@@ -75,6 +77,7 @@ require('hlargs').setup {
   },
   extras = {
     named_parameters = false,
+    unused_args = false,
   },
   hl_priority = 120,
   excluded_argnames = {
