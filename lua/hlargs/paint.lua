@@ -39,7 +39,7 @@ local function get_hl_group(bufnr, extmark)
       arg_name[1]
     )
   else
-    return colorpalette.get_hlgroup_hashed(arg_name)
+    return colorpalette.get_hlgroup_hashed(arg_name[1])
   end
 end
 
