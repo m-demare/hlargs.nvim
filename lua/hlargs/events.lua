@@ -92,6 +92,8 @@ end
 
 function M.add_range_to_queue(bufnr, from, to)
   if not enabled then return end
+  local buf_line_count = vim.api.nvim_buf_line_count(bufnr)
+  if to > buf_line_count then to = buf_line_count end
 
   local buf_data = bufdata.get(bufnr)
 
@@ -166,10 +168,14 @@ function M.buf_enter(data)
 
     buf_data.detach = attach(bufnr, {
       on_lines = function(ev, bufnr, _, from, old_to, to)
-        M.add_range_to_queue(bufnr, from, to)
+        vim.schedule(function()
+          M.add_range_to_queue(bufnr, from, to)
+        end)
       end,
       on_reload = function(ev, bufnr)
-        M.schedule_total_repaint(bufnr)
+        vim.schedule(function()
+          M.schedule_total_repaint(bufnr)
+        end)
       end,
     })
   end
