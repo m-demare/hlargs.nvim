@@ -92,6 +92,7 @@ end
 
 function M.add_range_to_queue(bufnr, from, to)
   if not enabled then return end
+  if not vim.api.nvim_buf_is_valid(bufnr) then return end
   local buf_line_count = vim.api.nvim_buf_line_count(bufnr)
   if to > buf_line_count then to = buf_line_count end
 
