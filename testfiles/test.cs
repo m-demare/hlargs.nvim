@@ -19,12 +19,14 @@ class Program {
 }
 
 class MyClass {
-  public MyClass(int arg0, float arg1) {
+  public MyClass(int arg0, float arg1, params string[] args) {
     this.arg0_ = arg0;
     this.arg1 = arg1;
+    this.args = args;
   }
   int arg0_;
   private float arg1;
+  string[] args;
 
   int fn(char arg2, int arg3 = 0) {
     return arg3 + arg2;
