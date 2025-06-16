@@ -1,0 +1,43 @@
+---
+const isAdult = user => user.age >= 18;
+
+// Server-side function example
+function processInputServerSide(value: string): string {
+  console.log(`Server processed: ${value}`);
+  return `Server says "${value}" is ${value.length} characters long.`;
+}
+
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Astro Page with Input</title>
+</head>
+<body>
+
+  <div class="info">
+    <p>User Details:</p>
+    <ul>
+      <li>...</li>
+    </ul>
+  </div>
+
+  <script is:inline>
+    // We can write client-side TypeScript directly here
+
+    // Client-side function to process the input value
+    function processInputClientSide(value: string): string {
+      if (value.length === 0) {
+        return 'Start typing above...';
+      } else {
+        return `You typed: "${value}" (Length: ${value.length})`;
+      }
+    }
+
+    console.log("Client-side script for input loaded.");
+  </script>
+  </body>
+</html>

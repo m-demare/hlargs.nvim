@@ -46,8 +46,7 @@ local function fix_mark(lang, bufnr, marks_ns, root_node, mark)
   })
 end
 
-function M.get_args(bufnr, func_node)
-  local lang = util.get_lang(bufnr)
+function M.get_args(bufnr, lang,  func_node)
   if util.has_no_arg_defs(lang) then return {}, {} end
 
   local query = ts_get_query(lang, "function_arguments")
@@ -68,8 +67,7 @@ function M.get_args(bufnr, func_node)
   return arg_nodes, arg_names_set
 end
 
-function M.get_body_nodes(bufnr, func_node)
-  local lang = util.get_lang(bufnr)
+function M.get_body_nodes(bufnr, lang, func_node)
   local query = ts_get_query(lang, "function_body")
 
   local start_row, _, end_row, _ = func_node:range()
@@ -85,8 +83,7 @@ function M.get_body_nodes(bufnr, func_node)
   return nodes
 end
 
-function M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
-  local lang = util.get_lang(bufnr)
+function M.get_arg_usages(bufnr, lang, body_nodes, arg_names_set, limits)
   local query = ts_get_query(lang, "variables")
   local has_no_arg_defs = util.has_no_arg_defs(lang)
 
@@ -122,13 +119,32 @@ end
 
 function M.get_nodes_to_paint(bufnr, marks_ns, mark)
   local lang = util.get_lang(bufnr)
+
+  local parser = ts.get_parser(bufnr, lang)
+  if not parser then return end
+
+  local syntax_tree = parser:parse()
+  if not syntax_tree then return end
+
+  for _, tree in ipairs(syntax_tree) do
+    M.get_nodes_to_paint_in_tree(bufnr, lang, tree, marks_ns, mark)
+  end
+
+  for ch_lang, ch_parser in pairs(parser:children()) do
+    syntax_tree = ch_parser:parse()
+    for _, tree in ipairs(syntax_tree or {}) do
+      M.get_nodes_to_paint_in_tree(bufnr, ch_lang, tree, marks_ns, mark)
+    end
+  end
+end
+
+function M.get_nodes_to_paint_in_tree(bufnr, lang, tree, marks_ns, mark)
+  local root = tree:root()
   local has_no_arg_defs = util.has_no_arg_defs(lang)
+
   local query = ts_get_query(lang, "function_definition")
   if query == nil then return end
 
-  local parser = ts.get_parser(bufnr, lang)
-  local syntax_tree = parser:parse()
-  local root = syntax_tree[1]:root()
 
   local start_row, _, end_row, _ = root:range()
   if mark then
@@ -145,10 +161,10 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
       return
     end
     local name = query.captures[id] -- name of the capture
-    local arg_nodes, arg_names_set = M.get_args(bufnr, node)
+    local arg_nodes, arg_names_set = M.get_args(bufnr, lang, node)
     local usages_nodes, used_args = {}, {}
     if config.opts.paint_arg_usages and (#arg_nodes > 0 or has_no_arg_defs) then
-      local body_nodes = M.get_body_nodes(bufnr, node)
+      local body_nodes = M.get_body_nodes(bufnr, lang, node)
       local limits = nil
       if mark then
         local from, to = util.get_marks_limits(bufnr, marks_ns, mark)
@@ -156,7 +172,7 @@ function M.get_nodes_to_paint(bufnr, marks_ns, mark)
       end
       if body_nodes and #body_nodes > 0 then
         -- So that empty functions don't fail
-        usages_nodes, used_args = M.get_arg_usages(bufnr, body_nodes, arg_names_set, limits)
+        usages_nodes, used_args = M.get_arg_usages(bufnr, lang, body_nodes, arg_names_set, limits)
       end
     end
     if config.opts.excluded_argnames.declarations[lang] then

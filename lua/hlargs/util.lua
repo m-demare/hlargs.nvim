@@ -38,6 +38,7 @@ end
 
 -- stylua: ignore
 local function_or_catch_node_validators = {
+  astro = { },
   bash = { "function_definition" },
   c = { "function_definition" },
   cpp = { "function_definition", "lambda_expression", "catch_clause" },

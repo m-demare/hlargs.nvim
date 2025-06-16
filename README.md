@@ -118,6 +118,7 @@ If you want to change the color dynamically, according to filetype or whatever, 
 
 ## Supported languages
 Currently these languages are supported
+- astro (you need both the `astro` parser and the JS/TS one)
 - c
 - cpp
 - c_sharp (C#)

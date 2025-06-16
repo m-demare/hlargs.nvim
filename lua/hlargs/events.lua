@@ -136,13 +136,10 @@ function M.schedule_total_repaint(bufnr, ignore_debounce)
 
   local buf_data = bufdata.get(bufnr)
   if buf_data.debouncers.total_parse then buf_data.debouncers.total_parse() end
-  if ignore_debounce then
+  local debounce_time = ignore_debounce and 100 or config.opts.performance.debounce.total_parse
+  buf_data.debouncers.total_parse = defer(function()
     M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.TOTAL)
-  else
-    buf_data.debouncers.total_parse = defer(function()
-      M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.TOTAL)
-    end, config.opts.performance.debounce.total_parse)
-  end
+  end, debounce_time)
 end
 
 function M.schedule_slow_repaint(bufnr)
@@ -163,9 +160,10 @@ function M.buf_enter(data)
     buf_data.initialized = true
     local lang = util.get_lang(bufnr)
     buf_data.ignore = not util.is_supported(lang)
-    buf_data.filetype = vim.fn.getbufvar(bufnr, "&filetype")
-    if not buf_data.ignore then M.schedule_total_repaint(bufnr, true) end
     if buf_data.ignore then return end
+    buf_data.filetype = vim.fn.getbufvar(bufnr, "&filetype")
+
+    M.schedule_total_repaint(bufnr, true)
 
     buf_data.detach = attach(bufnr, {
       on_lines = function(ev, bufnr, _, from, old_to, to)
