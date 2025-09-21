@@ -1,3 +1,7 @@
+(constructor_declaration
+  parameters: (formal_parameters
+    (formal_parameter
+      (identifier) @argname)))
 (method_declaration
   parameters: (formal_parameters
     (formal_parameter
@@ -11,4 +15,3 @@
 (catch_clause
   (catch_formal_parameter
     name: (identifier) @catch))
-
