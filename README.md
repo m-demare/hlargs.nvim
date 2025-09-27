@@ -120,9 +120,10 @@ If you want to change the color dynamically, according to filetype or whatever, 
 Currently these languages are supported
 - astro (you need both the `astro` parser and the JS/TS one)
 - c
-- cpp
 - c_sharp (C#)
+- cpp
 - go
+- html
 - java
 - javascript
 - jsx (react)
@@ -137,6 +138,7 @@ Currently these languages are supported
 - rust
 - scala
 - solidity
+- svelte
 - tsx (react)
 - typescript
 - vim
