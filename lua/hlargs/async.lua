@@ -23,11 +23,10 @@ local function defer(fn, time)
     if cancelled then return end
     fn()
   end, time)
-  -- stylua: ignore
-  return function ()
-    cancelled = true  -- It seems like there's some sort of race condition with these
-                      -- timers, they occasionally get executed after being cancelled.
-                      -- This flag prevents that behaviour.
+  return function()
+    cancelled = true -- It seems like there's some sort of race condition with these
+    -- timers, they occasionally get executed after being cancelled.
+    -- This flag prevents that behaviour.
     vim.loop.timer_stop(t)
   end
 end

@@ -39,13 +39,14 @@ end
 
 -- stylua: ignore
 local function_or_catch_node_validators = {
-  astro = { },
+  astro = {},
   bash = { "function_definition" },
   c = { "function_definition" },
+  c_sharp = { "constructor_declaration", "method_declaration", "lambda_expression" },
   cpp = { "function_definition", "lambda_expression", "catch_clause" },
   cuda = { "function_definition", "lambda_expression", "catch_clause" },
-  c_sharp = { "constructor_declaration", "method_declaration", "lambda_expression" },
   go = { "function_declaration", "method_declaration", "func_literal" },
+  html = {},
   java = { "constructor_declaration", "method_declaration", "lambda_expression", "catch_clause" },
   javascript = { "function_declaration", "function_expression", "method_definition", "arrow_function", "catch_clause" },
   jsx = { "function_declaration", "function_expression", "method_definition", "arrow_function", "catch_clause" },
@@ -58,8 +59,9 @@ local function_or_catch_node_validators = {
   r = { "function_definition" },
   ruby = { "method", "lambda", "block", "do_block", "rescue" },
   rust = { "function_item" },
-	scala = { 'lambda_expression', 'function_definition' },
+  scala = { "lambda_expression", "function_definition" },
   solidity = { "function_declaration", "function_definition", "constructor_definition", "modifier_definition" },
+  svelte = {},
   tsx = { "function_declaration", "function_expression", "method_definition", "arrow_function", "catch_clause" },
   typescript = { "function_declaration", "function_expression", "method_definition", "arrow_function", "catch_clause" },
   vim = { "function_definition", "lambda_expression" },
