@@ -58,6 +58,10 @@ end
 function M.find_and_paint_nodes(bufnr, task_type, mark)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   if not enabled then return end
+  if not vim.api.nvim_buf_is_valid(bufnr) then return end
+
+  local buf_data = bufdata.get(bufnr)
+  if buf_data.ignore then return end
 
   local task = bufdata.new_task(bufnr, task_type, mark)
   if not task then return end
@@ -68,6 +72,7 @@ end
 
 local function schedule_partial_repaints(bufnr, buf_data)
   if not vim.api.nvim_buf_is_valid(bufnr) then return end
+  if buf_data.ignore then return end
   buf_data.ranges_to_parse = util.merge_ranges(bufnr, buf_data.marks_ns, buf_data.ranges_to_parse)
 
   if
