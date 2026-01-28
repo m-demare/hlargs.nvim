@@ -1,4 +1,3 @@
-local M = {}
 local parser = require "hlargs.parse"
 local config = require "hlargs.config"
 local util = require "hlargs.util"
@@ -10,6 +9,10 @@ local defer = async.defer
 
 local enabled = false
 
+---@param bufnr integer
+---@param ns integer
+---@param node_group? TSNode[]
+---@param hl_group? string
 local function paint_nodes(bufnr, ns, node_group, hl_group)
   if not node_group then return end
   for _, node in ipairs(node_group) do
@@ -17,6 +20,9 @@ local function paint_nodes(bufnr, ns, node_group, hl_group)
   end
 end
 
+---@param bufnr integer
+---@param task HlArgs.BufData.Task
+---@param co thread
 local function find_and_paint_iteration(bufnr, task, co)
   local delay = config.opts.performance.parse_delay
   if task.type == bufdata.TaskTypes.SLOW then delay = config.opts.performance.slow_parse_delay end
@@ -50,11 +56,19 @@ local function find_and_paint_iteration(bufnr, task, co)
   end, delay)
 end
 
+---@param bufnr integer
+---@return boolean excluded
 local function is_excluded(bufnr)
   local lang = util.get_lang(bufnr)
   return config.opts.disable(lang, bufnr)
 end
 
+---@class HlArgs.Events
+local M = {}
+
+---@param bufnr? integer
+---@param task_type TaskTypes
+---@param mark? integer
 function M.find_and_paint_nodes(bufnr, task_type, mark)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   if not enabled then return end
@@ -66,6 +80,8 @@ function M.find_and_paint_nodes(bufnr, task_type, mark)
   find_and_paint_iteration(bufnr, task, co)
 end
 
+---@param bufnr integer
+---@param buf_data HlArgs.BufData.Data
 local function schedule_partial_repaints(bufnr, buf_data)
   if not vim.api.nvim_buf_is_valid(bufnr) then return end
   buf_data.ranges_to_parse = util.merge_ranges(bufnr, buf_data.marks_ns, buf_data.ranges_to_parse)
@@ -90,6 +106,9 @@ local function schedule_partial_repaints(bufnr, buf_data)
   M.schedule_slow_repaint(bufnr)
 end
 
+---@param bufnr integer
+---@param from integer
+---@param to integer
 function M.add_range_to_queue(bufnr, from, to)
   if not enabled then return end
   if not vim.api.nvim_buf_is_valid(bufnr) then return end
@@ -126,6 +145,8 @@ function M.add_range_to_queue(bufnr, from, to)
   end, debounce_time)
 end
 
+---@param bufnr integer
+---@param ignore_debounce? boolean
 function M.schedule_total_repaint(bufnr, ignore_debounce)
   if not enabled then return end
   if bufdata.total_parse_is_running(bufnr) then
@@ -142,6 +163,7 @@ function M.schedule_total_repaint(bufnr, ignore_debounce)
   end, debounce_time)
 end
 
+---@param bufnr integer
 function M.schedule_slow_repaint(bufnr)
   if not enabled then return end
 
@@ -152,26 +174,26 @@ function M.schedule_slow_repaint(bufnr)
   end, config.opts.performance.debounce.slow_parse)
 end
 
+---@param data vim.api.keyset.create_autocmd.callback_args|{ buf: integer }
 function M.buf_enter(data)
-  local bufnr = data.buf
-  if is_excluded(bufnr) then return end
-  local buf_data = bufdata.get(bufnr)
+  if is_excluded(data.buf) then return end
+  local buf_data = bufdata.get(data.buf)
   if not buf_data.initialized then
     buf_data.initialized = true
-    local lang = util.get_lang(bufnr)
+    local lang = util.get_lang(data.buf)
     buf_data.ignore = not util.is_supported(lang)
     if buf_data.ignore then return end
-    buf_data.filetype = vim.fn.getbufvar(bufnr, "&filetype")
+    buf_data.filetype = vim.api.nvim_get_option_value("filetype", { buf = data.buf })
 
-    M.schedule_total_repaint(bufnr, true)
+    M.schedule_total_repaint(data.buf, true)
 
-    buf_data.detach = attach(bufnr, {
-      on_lines = function(ev, bufnr, _, from, old_to, to)
+    buf_data.detach = attach(data.buf, {
+      on_lines = function(_, bufnr, _, from, _, to)
         vim.schedule(function()
           M.add_range_to_queue(bufnr, from, to)
         end)
       end,
-      on_reload = function(ev, bufnr)
+      on_reload = function(_, bufnr)
         vim.schedule(function()
           M.schedule_total_repaint(bufnr)
         end)
@@ -180,6 +202,7 @@ function M.buf_enter(data)
   end
 end
 
+---@param data vim.api.keyset.create_autocmd.callback_args|{ buf: integer }
 function M.filetype(data)
   local bufnr = data.buf
   local ft = data.match
@@ -190,11 +213,13 @@ function M.filetype(data)
   end
 end
 
+---@param data vim.api.keyset.create_autocmd.callback_args|{ buf: integer }
 function M.buf_delete(data)
   local bufnr = data.buf
   bufdata.delete_data(bufnr)
 end
 
+---@param data vim.api.keyset.create_autocmd.callback_args|{ buf: integer }
 function M.external_file_change(data)
   M.buf_delete(data)
   M.buf_enter(data)
@@ -217,22 +242,24 @@ function M.enable()
 end
 
 function M.disable()
-  if enabled then
-    enabled = false
-    vim.api.nvim_clear_autocmds { group = "Hlargs" }
+  if not enabled then return end
 
-    for bufnr, _ in pairs(bufdata.get_all()) do
-      bufdata.delete_data(bufnr)
-    end
+  enabled = false
+  vim.api.nvim_clear_autocmds { group = "Hlargs" }
+
+  for bufnr, _ in pairs(bufdata.get_all()) do
+    bufdata.delete_data(bufnr)
   end
 end
 
+---@param bufnr integer
 local function validate_bufnr(bufnr)
   if not vim.api.nvim_buf_is_valid(bufnr) then
     error("Invalid buffer number " .. tostring(bufnr))
   end
 end
 
+---@param bufnr? integer
 function M.enable_buf(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   validate_bufnr(bufnr)
@@ -241,6 +268,7 @@ function M.enable_buf(bufnr)
   M.buf_enter { buf = bufnr }
 end
 
+---@param bufnr? integer
 function M.disable_buf(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   validate_bufnr(bufnr)
@@ -257,9 +285,9 @@ end
 function M.toggle()
   if enabled then
     M.disable()
-  else
-    M.enable()
+    return
   end
+  M.enable()
 end
 
 return M

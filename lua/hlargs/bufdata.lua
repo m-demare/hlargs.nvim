@@ -2,34 +2,63 @@ local M = {}
 local util = require "hlargs.util"
 local paint = require "hlargs.paint"
 
-local data = {}
+local data = {} ---@type table<integer, HlArgs.BufData.Data>
 local main_ns = vim.api.nvim_create_namespace "hlargs_main"
 
-M.TaskTypes = {
-  PARTIAL = 1,
-  TOTAL = 2,
-  SLOW = 3,
-}
+---@class HlArgs.BufData.Debouncers
+---@field range_queue? function
+---@field total_parse? function
+---@field slow_parse? function
 
+---@class HlArgs.BufData.Task
+---@field change_idx integer
+---@field mark? integer
+---@field ns integer
+---@field stop boolean
+---@field stopped_tasks? HlArgs.BufData.Task[]
+---@field type TaskTypes
+
+---@class HlArgs.BufData.Data
+---@field change_idx integer
+---@field debouncers HlArgs.BufData.Debouncers
+---@field detach? function
+---@field filetype? string
+---@field ignore? boolean
+---@field initialized boolean
+---@field marks_ns integer
+---@field ranges_to_parse? integer[]
+---@field tasks HlArgs.BufData.Task[]
+---@field ts_cb_attached boolean
+
+---@enum TaskTypes
+M.TaskTypes = { PARTIAL = 1, TOTAL = 2, SLOW = 3 }
+
+---@param bufnr integer
+---@return HlArgs.BufData.Data data
 function M.get(bufnr)
-  data[bufnr] = data[bufnr]
-    or {
-      change_idx = 0,
-      tasks = {},
-      debouncers = {},
-      ranges_to_parse = {},
-      marks_ns = vim.api.nvim_create_namespace "",
-      initialized = false,
-      ts_cb_attached = false,
-    }
+  local default = { ---@type HlArgs.BufData.Data
+    change_idx = 0,
+    tasks = {},
+    debouncers = {},
+    ranges_to_parse = {},
+    marks_ns = vim.api.nvim_create_namespace "",
+    initialized = false,
+    ts_cb_attached = false,
+  }
+  data[bufnr] = data[bufnr] or default
   return data[bufnr]
 end
 
+---@return table<integer, HlArgs.BufData.Data> data
 function M.get_all()
   return data
 end
 
-function M.new_task(bufnr, type, mark)
+---@param bufnr integer
+---@param task_type TaskTypes
+---@param mark integer
+---@return HlArgs.BufData.Task task
+function M.new_task(bufnr, task_type, mark)
   local buf_data = M.get(bufnr)
   if buf_data.ignore then
     error(
@@ -41,19 +70,21 @@ function M.new_task(bufnr, type, mark)
   end
   buf_data.change_idx = buf_data.change_idx + 1
 
-  local task = {
-    mark = mark,
+  local task = { ---@type HlArgs.BufData.Task
     change_idx = buf_data.change_idx,
+    mark = mark,
     ns = vim.api.nvim_create_namespace "",
     stop = false,
-    type = type,
     stopped_tasks = {},
+    type = task_type,
   }
 
   table.insert(buf_data.tasks, task)
   return task
 end
 
+---@param bufnr integer
+---@return boolean running
 function M.total_parse_is_running(bufnr)
   local buf_data = M.get(bufnr)
   for _, t in ipairs(buf_data.tasks) do
@@ -62,6 +93,9 @@ function M.total_parse_is_running(bufnr)
   return false
 end
 
+---@param bufnr integer
+---@param buf_data HlArgs.BufData.Data
+---@param task HlArgs.BufData.Task
 local function clean_stopped_tasks(bufnr, buf_data, task)
   if not task.stopped_tasks then return end
   for _, t in ipairs(task.stopped_tasks) do
@@ -71,9 +105,11 @@ local function clean_stopped_tasks(bufnr, buf_data, task)
   end
 end
 
+---@param bufnr integer
+---@param task HlArgs.BufData.Task
 function M.end_task(bufnr, task)
   local buf_data = M.get(bufnr)
-  local limits = nil
+  local limits = nil ---@type nil|{ [1]: integer, [2]: integer }
   if task.mark and vim.api.nvim_buf_is_loaded(bufnr) then
     local from, to = util.get_marks_limits(bufnr, buf_data.marks_ns, task.mark)
     limits = { from, to + 1 }
@@ -96,13 +132,15 @@ function M.end_task(bufnr, task)
   for i = #buf_data.tasks, 1, -1 do
     if buf_data.tasks[i] == task then table.remove(buf_data.tasks, i) end
   end
-  if #buf_data.tasks == 0 then
+  if vim.tbl_isempty(buf_data.tasks) then
     -- Reset change_idx so that it doesn't grow too much
     -- (Especially for people who never close nvim)
     buf_data.change_idx = 0
   end
 end
 
+---@param bufnr integer
+---@param task HlArgs.BufData.Task
 function M.stop_older_contained(bufnr, task)
   if not vim.api.nvim_buf_is_loaded(bufnr) then return end
   local buf_data = M.get(bufnr)
@@ -123,6 +161,7 @@ function M.stop_older_contained(bufnr, task)
   end
 end
 
+---@param buf_data HlArgs.BufData.Data
 local function clean_debouncers(buf_data)
   if buf_data.debouncers.range_queue then buf_data.debouncers.range_queue() end
   if buf_data.debouncers.total_parse then buf_data.debouncers.total_parse() end
@@ -130,6 +169,7 @@ local function clean_debouncers(buf_data)
 end
 
 -- Gets called on disable / BufDelete
+---@param bufnr integer
 function M.delete_data(bufnr)
   if data[bufnr] == nil then return end
   for _, t in ipairs(data[bufnr].tasks) do
@@ -146,7 +186,11 @@ function M.delete_data(bufnr)
 end
 
 function M.debug()
-  vim.pretty_print(data)
+  if vim.fn.has "nvim-0.9" ~= 1 then
+    vim.pretty_print(data)
+    return
+  end
+  vim.print(data)
 end
 
 return M
