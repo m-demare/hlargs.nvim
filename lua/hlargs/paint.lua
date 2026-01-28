@@ -1,11 +1,15 @@
+---@class HlArgs.Paint
+---@overload fun(bufnr: integer, ns: integer, node: TSNode, group: string)
 local M = {}
 local config = require "hlargs.config"
 local colorpalette = require "hlargs.colorpalette"
-local hl_group = "Hlargs"
-M.hl_group = hl_group
+M.hl_group = "Hlargs"
 
 -- Clears a namespace within limits
 -- (or in the entire buffer if limits is nil)
+---@param bufnr integer
+---@param ns integer
+---@param limits? { [1]: integer, [2]: integer }
 function M.clear(bufnr, ns, limits)
   local from, to = 0, -1
   if limits then
@@ -14,16 +18,29 @@ function M.clear(bufnr, ns, limits)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, from, to)
 end
 
+---@param bufnr integer
+---@param ns integer
+---@param start_row integer
+---@param start_col integer
+---@param end_row integer
+---@param end_col integer
+---@param hl_group? string
+---@param priority? integer
+---@return boolean success
+---@return integer mar_id
 function M.set_extmark(bufnr, ns, start_row, start_col, end_row, end_col, hl_group, priority)
   local ok, mark_id = pcall(vim.api.nvim_buf_set_extmark, bufnr, ns, start_row, start_col, {
     end_line = end_row,
     end_col = end_col,
-    hl_group = hl_group,
+    hl_group = hl_group or M.hl_group,
     priority = priority,
   })
   return ok, mark_id
 end
 
+---@param bufnr integer
+---@param extmark { [2]: integer, [3]: integer, [4]: vim.api.keyset.set_extmark }
+---@return string hl_group
 local function get_hl_group(bufnr, extmark)
   if not config.opts.use_colorpalette then return extmark[4].hl_group end
   local start_row, start_col, end_row, end_col =
@@ -38,12 +55,16 @@ local function get_hl_group(bufnr, extmark)
       end_col,
       arg_name[1]
     )
-  else
-    return colorpalette.get_hlgroup_hashed(arg_name[1])
   end
+  return colorpalette.get_hlgroup_hashed(arg_name[1])
 end
 
+---@param bufnr integer
+---@param dst integer
+---@param src integer
+---@param limits? { [1]: integer, [2]: integer }
 function M.combine_nss(bufnr, dst, src, limits)
+  ---@type integer[]|integer, integer[]|integer
   local from, to = 0, -1
   if limits then
     from, to = { limits[1], 0 }, { limits[2], -1 }
@@ -70,6 +91,11 @@ function M.combine_nss(bufnr, dst, src, limits)
 end
 
 setmetatable(M, {
+  ---@param self HlArgs.Paint
+  ---@param bufnr integer
+  ---@param ns integer
+  ---@param node TSNode
+  ---@param group string
   __call = function(self, bufnr, ns, node, group)
     local start_row, start_col, end_row, end_col = node:range()
     M.set_extmark(
@@ -79,7 +105,7 @@ setmetatable(M, {
       start_col,
       end_row,
       end_col,
-      group or hl_group,
+      group or self.hl_group,
       config.opts.hl_priority
     )
   end,

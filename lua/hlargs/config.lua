@@ -1,5 +1,47 @@
+---@class HlArgsOpts.ExcludedArgnames
+---@field declarations? table<string, string[]>
+---@field usages? table<string, string[]>
+
+---@class HlArgsOpts.Performance.Debounce
+---@field partial_parse? integer
+---@field partial_insert_mode? integer
+---@field total_parse? integer
+---@field slow_parse? integer
+
+---@class HlArgsOpts.Performance
+---@field parse_delay? integer
+---@field slow_parse_delay? integer
+---@field max_iterations? integer
+---@field max_concurrent_partial_parses? integer
+---@field debounce? HlArgsOpts.Performance.Debounce
+
+---@class HlArgsOpts.PaintCatchBlocks
+---@field declarations? boolean
+---@field usages? boolean
+
+---@class HlArgsOpts.Extras
+---@field named_parameters? false|vim.api.keyset.highlight
+---@field unused_args? false|vim.api.keyset.highlight
+
+---@class HlArgs.Config
+---@field opts HlArgsOpts
 local M = {}
 
+---@class HlArgsOpts
+---@field enabled? boolean
+---@field color? string
+---@field use_colorpalette? boolean
+---@field sequential_colorpalette? boolean
+---@field colorpalette? vim.api.keyset.highlight[]
+---@field highlight? vim.api.keyset.highlight
+---@field excluded_filetypes? string[]
+---@field disable? fun(lang: string, bufnr: integer): boolean
+---@field paint_arg_declarations? boolean
+---@field paint_arg_usages? boolean
+---@field extras? HlArgsOpts.Extras
+---@field paint_catch_blocks? HlArgsOpts.PaintCatchBlocks
+---@field hl_priority? integer
+---@field excluded_argnames? HlArgsOpts.ExcludedArgnames
 local defaults = {
   enabled = true,
   color = "#ef9062",
@@ -23,8 +65,8 @@ local defaults = {
   },
   highlight = {},
   excluded_filetypes = {},
-  disable = function(lang, bufnr)
-    return vim.tbl_contains(M.opts.excluded_filetypes, lang)
+  disable = function(lang)
+    return vim.list_contains(M.opts.excluded_filetypes, lang)
   end,
   paint_arg_declarations = true,
   paint_arg_usages = true,
@@ -58,41 +100,44 @@ local defaults = {
   },
 }
 
+function M.create_hl_groups()
+  if M.opts.use_colorpalette then
+    for i, color in pairs(M.opts.colorpalette) do
+      color.default = true
+      if not vim.tbl_isempty(M.opts.highlight) then
+        color = vim.tbl_deep_extend("force", color, M.opts.highlight)
+      end
+      vim.api.nvim_set_hl(0, "Hlarg" .. i, color)
+    end
+  else
+    if vim.tbl_isempty(M.opts.highlight) then
+      vim.api.nvim_set_hl(0, "Hlargs", { fg = M.opts.color, default = true })
+    else
+      M.opts.highlight.default = true
+      vim.api.nvim_set_hl(0, "Hlargs", M.opts.highlight)
+    end
+  end
+  if M.opts.extras.unused_args then
+    vim.api.nvim_set_hl(0, "HlargsUnused", M.opts.extras.unused_args)
+  end
+
+  if M.opts.extras.named_parameters then
+    if M.opts.extras.named_parameters == true then
+      M.opts.extras.named_parameters = { link = "Hlargs" }
+    end
+    vim.api.nvim_set_hl(0, "@HlargsNamedParams", M.opts.extras.named_parameters)
+  end
+end
+
+---@param opts? HlArgsOpts
 function M.setup(opts)
   M.opts = vim.tbl_deep_extend("force", {}, defaults, opts or {})
 
-  local function create_hl_groups()
-    if M.opts.use_colorpalette then
-      for i, color in pairs(M.opts.colorpalette) do
-        color.default = true
-        if not vim.tbl_isempty(M.opts.highlight) then
-          color = vim.tbl_deep_extend("force", color, M.opts.highlight)
-        end
-        vim.api.nvim_set_hl(0, "Hlarg" .. i, color)
-      end
-    else
-      if vim.tbl_isempty(M.opts.highlight) then
-        vim.api.nvim_set_hl(0, "Hlargs", { fg = M.opts.color, default = true })
-      else
-        M.opts.highlight.default = true
-        vim.api.nvim_set_hl(0, "Hlargs", M.opts.highlight)
-      end
-    end
-    if M.opts.extras.unused_args then
-      vim.api.nvim_set_hl(0, "HlargsUnused", M.opts.extras.unused_args)
-    end
-
-    if M.opts.extras.named_parameters then
-      if M.opts.extras.named_parameters == true then M.opts.extras.named_parameters = { link = "Hlargs" } end
-      vim.api.nvim_set_hl(0, "@HlargsNamedParams", M.opts.extras.named_parameters)
-    end
-  end
-
-  create_hl_groups()
+  M.create_hl_groups()
 
   local augroup = vim.api.nvim_create_augroup("hlargs-create-hlgroups", { clear = true })
   vim.api.nvim_create_autocmd("ColorScheme", {
-    callback = create_hl_groups,
+    callback = M.create_hl_groups,
     group = augroup,
   })
 end
