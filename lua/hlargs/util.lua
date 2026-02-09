@@ -21,6 +21,10 @@ local ignored_field_names = {
     field_access = { "field" },
   },
   scala = { field_expression = { "field" } },
+  swift = {
+    navigation_suffix = { "suffix" },
+    value_argument = { "name", "reference_specifier" },
+  },
   vim = {
     scoped_identifier = { "_" },
   },
@@ -58,7 +62,8 @@ local function_or_catch_node_validators = {
   r = { "function_definition" },
   ruby = { "method", "lambda", "block", "do_block", "rescue" },
   rust = { "function_item" },
-	scala = { 'lambda_expression', 'function_definition' },
+  scala = { 'lambda_expression', 'function_definition' },
+  swift = { "function_declaration", "init_declaration", "deinit_declaration", "lambda_literal", "catch_block" },
   solidity = { "function_declaration", "function_definition", "constructor_definition", "modifier_definition" },
   tsx = { "function_declaration", "function_expression", "method_definition", "arrow_function", "catch_clause" },
   typescript = { "function_declaration", "function_expression", "method_definition", "arrow_function", "catch_clause" },

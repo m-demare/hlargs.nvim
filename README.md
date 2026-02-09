@@ -137,6 +137,7 @@ Currently these languages are supported
 - rust
 - scala
 - solidity
+- swift
 - tsx (react)
 - typescript
 - vim
