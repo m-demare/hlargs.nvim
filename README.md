@@ -139,6 +139,7 @@ Currently these languages are supported
 - scala
 - solidity
 - svelte
+- swift
 - tsx (react)
 - typescript
 - vim
