@@ -46,7 +46,7 @@ local function fix_mark(lang, bufnr, marks_ns, root_node, mark)
   })
 end
 
-function M.get_args(bufnr, lang,  func_node)
+function M.get_args(bufnr, lang, func_node)
   if util.has_no_arg_defs(lang) then return {}, {} end
 
   local query = ts_get_query(lang, "function_arguments")
@@ -144,7 +144,6 @@ function M.get_nodes_to_paint_in_tree(bufnr, lang, tree, marks_ns, mark)
 
   local query = ts_get_query(lang, "function_definition")
   if query == nil then return end
-
 
   local start_row, _, end_row, _ = root:range()
   if mark then

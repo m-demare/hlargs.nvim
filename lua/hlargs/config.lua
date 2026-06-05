@@ -83,7 +83,9 @@ function M.setup(opts)
     end
 
     if M.opts.extras.named_parameters then
-      if M.opts.extras.named_parameters == true then M.opts.extras.named_parameters = { link = "Hlargs" } end
+      if M.opts.extras.named_parameters == true then
+        M.opts.extras.named_parameters = { link = "Hlargs" }
+      end
       vim.api.nvim_set_hl(0, "@HlargsNamedParams", M.opts.extras.named_parameters)
     end
   end
