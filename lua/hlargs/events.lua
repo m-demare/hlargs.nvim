@@ -58,6 +58,10 @@ end
 function M.find_and_paint_nodes(bufnr, task_type, mark)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   if not enabled then return end
+  if not vim.api.nvim_buf_is_valid(bufnr) then return end
+
+  local buf_data = bufdata.get(bufnr)
+  if buf_data.ignore then return end
 
   local task = bufdata.new_task(bufnr, task_type, mark)
   if not task then return end
@@ -68,6 +72,7 @@ end
 
 local function schedule_partial_repaints(bufnr, buf_data)
   if not vim.api.nvim_buf_is_valid(bufnr) then return end
+  if buf_data.ignore then return end
   buf_data.ranges_to_parse = util.merge_ranges(bufnr, buf_data.marks_ns, buf_data.ranges_to_parse)
 
   if
@@ -93,10 +98,10 @@ end
 function M.add_range_to_queue(bufnr, from, to)
   if not enabled then return end
   if not vim.api.nvim_buf_is_valid(bufnr) then return end
+  local buf_data = bufdata.get(bufnr)
+  if buf_data.ignore then return end
   local buf_line_count = vim.api.nvim_buf_line_count(bufnr)
   if to > buf_line_count then to = buf_line_count end
-
-  local buf_data = bufdata.get(bufnr)
 
   -- `merge_ranges` won't be able to get the number under `max_concurrent_partial_parses` anyway,
   -- and creating this many extmarks would be pointless
@@ -128,13 +133,15 @@ end
 
 function M.schedule_total_repaint(bufnr, ignore_debounce)
   if not enabled then return end
+  if not vim.api.nvim_buf_is_valid(bufnr) then return end
+  local buf_data = bufdata.get(bufnr)
+  if buf_data.ignore then return end
   if bufdata.total_parse_is_running(bufnr) then
     -- Don't want to run multiple total repaints simultaneously
     M.schedule_slow_repaint(bufnr)
     return
   end
 
-  local buf_data = bufdata.get(bufnr)
   if buf_data.debouncers.total_parse then buf_data.debouncers.total_parse() end
   local debounce_time = ignore_debounce and 100 or config.opts.performance.debounce.total_parse
   buf_data.debouncers.total_parse = defer(function()
@@ -144,8 +151,9 @@ end
 
 function M.schedule_slow_repaint(bufnr)
   if not enabled then return end
-
+  if not vim.api.nvim_buf_is_valid(bufnr) then return end
   local buf_data = bufdata.get(bufnr)
+  if buf_data.ignore then return end
   if buf_data.debouncers.slow_parse then buf_data.debouncers.slow_parse() end
   buf_data.debouncers.slow_parse = defer(function()
     M.find_and_paint_nodes(bufnr, bufdata.TaskTypes.SLOW)
